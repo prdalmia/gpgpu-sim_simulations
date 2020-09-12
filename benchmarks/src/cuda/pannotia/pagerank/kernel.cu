@@ -112,7 +112,7 @@ pagerank2(int *row, int *col, int *data, float *page_rank1, float *page_rank2,
     // Update pagerank value with the damping factor
     if (tid < num_nodes) {
        // page_rank1[tid]	= 0.15 / (float)num_nodes + 0.85 * page_rank2[tid];
-        atomicExch(&page_rank1[tid], 0.15 / (float)num_nodes + 0.85 * atomicAdd(&page_rank2[tid], 0.0f);
+        atomicExch(&page_rank1[tid], 0.15 / (float)num_nodes + 0.85 * atomicAdd(&page_rank2[tid], 0.0f));
        // page_rank2[tid] = 0.0f;
         atomicExch(&page_rank2[tid] , 0.0f);
     }
