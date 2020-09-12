@@ -196,7 +196,7 @@ int main(int argc, char **argv)
     }
 
     // Run PageRank for some iter. TO: convergence determination
-    for (int i = 0; i < ITER; i++) {
+    for (int i = 0; i < 10; i++) {
         // Launch pagerank kernel 1
         pagerank1 <<<grid, threads>>>(row_d, col_d, data_d, pagerank1_d,
                                       pagerank2_d, num_nodes, num_edges);

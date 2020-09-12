@@ -165,7 +165,7 @@ csr_array *parseMetis(char* tmpchar, int *p_num_nodes, int *p_num_edges, bool di
                 tail = atoi(pch);
                 if (tail <= 0)  break;
 
-                if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
+//                if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
 
                 temp.row = head - 1;
                 temp.col = tail - 1;
@@ -270,7 +270,7 @@ csr_array *parseCOO(char* tmpchar, int *p_num_nodes, int *p_num_edges, bool dire
 
         case 'a':
             sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight);
-            if (tail == head) printf("reporting self loop\n");
+           // if (tail == head) printf("reporting self loop\n");
             CooTuple temp;
             temp.row = head - 1;
             temp.col = tail - 1;
@@ -384,7 +384,7 @@ double_edges *parseMetis_doubleEdge(char* tmpchar, int *p_num_nodes, int *p_num_
                 tail = atoi(pch);
                 if (tail <= 0) break;
 
-                if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
+            //    if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
 
                 temp.row = head - 1;
                 temp.col = tail - 1;
@@ -473,7 +473,7 @@ double_edges *parseCOO_doubleEdge(char* tmpchar, int *p_num_nodes, int *p_num_ed
             break;
         case 'a':
             sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight);
-            if (tail == head) printf("reporting self loop\n");
+            //if (tail == head) printf("reporting self loop\n");
             CooTuple temp;
             temp.row = head - 1;
             temp.col = tail - 1;
@@ -572,12 +572,12 @@ csr_array *parseMM(char* tmpchar, int *p_num_nodes, int *p_num_edges, bool direc
                 sscanf(line, "%d %d %d", &head, &tail, &weight);
             } else {
                 sscanf(line, "%d %d",  &head, &tail);
-                printf("(%d, %d)\n", head, tail);
+         //       printf("(%d, %d)\n", head, tail);
                 weight = 0;
             }
 
             if (tail == head) {
-                printf("reporting self loop\n");
+           //     printf("reporting self loop\n");
                 continue;
             };
 
@@ -697,7 +697,7 @@ csr_array *parseMetis_transpose(char* tmpchar, int *p_num_nodes, int *p_num_edge
                     break;
                 }
 
-                if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
+//                if (tail == head) printf("reporting self loop: %d, %d\n", lineno + 1, lineno);
 
                 if (directed) {
                     temp.row = tail - 1;
@@ -815,7 +815,7 @@ csr_array *parseCOO_transpose(char* tmpchar, int *p_num_nodes, int *p_num_edges,
 
         case 'a':
             sscanf(line, "%c %d %d %d", &a, &head, &tail, &weight);
-            if (tail == head) printf("reporting self loop\n");
+  //          if (tail == head) printf("reporting self loop\n");
             CooTuple temp;
             temp.val = weight;
             temp.row = tail - 1;
