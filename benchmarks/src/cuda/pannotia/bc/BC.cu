@@ -211,7 +211,7 @@ int main(int argc, char **argv)
     clean_bc<<< grid, threads >>>(bc_d, num_nodes);
 
     // Main computation loop
-    for (int i = 0; i < num_nodes && i < MAX_ITERS; i++) {
+    for (int i = 0; i < num_nodes && i < 10; i++) {
 
         clean_1d_array<<< grid, threads >>>(i, dist_d, sigma_d, rho_d,
                                             num_nodes);
