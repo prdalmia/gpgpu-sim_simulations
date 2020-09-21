@@ -74,7 +74,7 @@ void m5_work_end(uint64_t workid, uint64_t threadid);
 #endif
 
 #ifdef GEM5_FUSION
-#define MAX_ITERS 150
+#define MAX_ITERS 10
 #else
 #include <stdint.h>
 #define MAX_ITERS INT_MAX

@@ -97,7 +97,7 @@ bfs_kernel(int *row, int *col, int *d, float *rho, int *cont,
             }
             //transfer the rho value to the neighbor
             if (d[w] == (dist + 1)) {
-                atomicAdd(&rho[w], rho[tid]);
+                atomicAdd(&rho[w], atomicAdd(&rho[tid], 0.0f));
             }
         }
     }
@@ -142,12 +142,12 @@ backtrack_kernel(int *row, int *col, int *d, float *rho, float *sigma,
             int w = col[edge];
             // Update the sigma value traversing back
             if (d[w] == dist - 2)
-                atomicAdd(&sigma[w], rho[w] / rho[tid] * (1 + sigma[tid]));
+                atomicAdd(&sigma[w], atomicAdd(&rho[w], 0.0f) / atomicAdd(&rho[tid], 0.0f) * (1 + atomicAdd(&sigma[tid], 0.0f)));
         }
 
         // Update the BC value
         if (tid != s)
-            bc[tid] = bc[tid] + sigma[tid];
+            bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
     }
 
 }
@@ -171,7 +171,7 @@ back_sum_kernel(const int s, const int dist, int *d, float *sigma, float *bc,
     if (tid < num_nodes) {
         // If it is not the source
         if (s != tid && d[tid] == dist - 1) {
-            bc[tid] = bc[tid] + sigma[tid];
+            bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
         }
     }
 }
@@ -192,15 +192,15 @@ clean_1d_array(const int source, int *dist_array, float *sigma, float *rho,
 
     if (tid < num_nodes) {
 
-        sigma[tid] = 0;
+        atomicExch(&sigma[tid] , 0.0f);
 
         if (tid == source) {
             // If source vertex rho = 1, dist = 0
-            rho[tid] = 1;
+            atomicExch(&sigma[tid] , 1.0f);
             dist_array[tid] = 0;
         } else {
             // If other vertices rho = 0, dist = -1
-            rho[tid] = 0;
+            atomicExch(&sigma[tid] , 0.0f);
             dist_array[tid] = -1;
         }
     }
