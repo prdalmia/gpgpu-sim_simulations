@@ -206,12 +206,14 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    //int *  stop = (int *)malloc(num_nodes * sizeof(int) );
+    
     int stop = 1;
     int cnt = 0;
     // Main computation loop
     for (int i = 1; i < num_nodes; i++) {
         // Reset the termination variable
-        stop = 0;
+        stop[i] = 0;
 
         // Copy the termination variable to the device
         err = cudaMemcpy(stop_d, &stop, sizeof(int), cudaMemcpyHostToDevice);
@@ -221,7 +223,7 @@ int main(int argc, char **argv)
         }
 
         // Launch the assignment kernel
-        vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop, num_nodes);
+        vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop_d, num_nodes);
 
         // Launch the min.+ kernel
         spmv_min_dot_plus_kernel <<<grid, threads>>>(num_nodes, row_d, col_d,
