@@ -69,10 +69,7 @@
  */
 __global__ void
 pagerank1(int * row, int * col, float * data, float * page_rank1,
-          float * page_rank2, const int num_nodes, const int num_edges,
-          const int nodes_per_thread,
-          const region_t rowColReg, const region_t pgRk1Reg,
-          const region_t pgRk2Reg)
+          float * page_rank2, const int num_nodes, const int num_edges)
 {
   // Get my workitem id
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
@@ -82,7 +79,7 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
         * addr6 = NULL, * addr7 = NULL;
   int nid0 = 0, nid1 = 0, nid2 = 0, nid3 = 0, nid4 = 0,
       nid5 = 0, nid6 = 0, nid7 = 0;
-
+/*
   if (threadIdx.x == 0) {
     __denovo_setAcquireRegion(SPECIAL_REGION);
     __denovo_addAcquireRegion(READ_ONLY_REGION);
@@ -91,7 +88,7 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
     __denovo_addAcquireRegion(rowColReg); // read-only region
   }
   __syncthreads();
-
+*/
   for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
     // Get the starting and ending pointers of the neighborlist
     int start = row[tid];
@@ -395,7 +392,7 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
       );
     }
   }
-
+/*
   if (threadIdx.x == 0) {
     __denovo_gpuEpilogue(SPECIAL_REGION);
     __denovo_gpuEpilogue(READ_ONLY_REGION);
@@ -403,6 +400,7 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
     __denovo_gpuEpilogue(pgRk1Reg);
     __denovo_gpuEpilogue(rowColReg);
   }
+  */
 }
 
 /**
@@ -419,13 +417,11 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
  */
 __global__ void
 pagerank2(int * row, int * col, float * data, float * page_rank1,
-          float * page_rank2, const int num_nodes, const int num_edges,
-          const int nodes_per_thread,
-          const region_t pgRk1Reg, const region_t pgRk2Reg)
+          float * page_rank2, const int num_nodes, const int num_edges)
 {
   // Get my workitem id
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
-
+/*
   if (threadIdx.x == 0) {
     __denovo_setAcquireRegion(SPECIAL_REGION);
     __denovo_addAcquireRegion(READ_ONLY_REGION);
@@ -434,7 +430,7 @@ pagerank2(int * row, int * col, float * data, float * page_rank1,
     //__denovo_addAcquireRegion(READ_ONLY_REGION); // include to be safe, not used in this kernel
   }
   __syncthreads();
-
+*/
   // Update pagerank value with the damping factor
   for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
     /*
@@ -447,13 +443,14 @@ pagerank2(int * row, int * col, float * data, float * page_rank1,
     page_rank1[tid]	= 0.15 / (float)num_nodes + 0.85 * atomicAdd(&(page_rank2[tid]), 0);
     atomicOr((int *)&(page_rank2[tid]), 0); //page_rank2[tid] = 0.0f;
   }
-
+/*
   if (threadIdx.x == 0) {
     __denovo_gpuEpilogue(SPECIAL_REGION);
     __denovo_gpuEpilogue(pgRk1Reg); // written with data stores
     __denovo_gpuEpilogue(pgRk2Reg); // written with atomics
     __denovo_gpuEpilogue(READ_ONLY_REGION); // include to be safe, not used in this kernel
   }
+  */
 }
 
 ///**
