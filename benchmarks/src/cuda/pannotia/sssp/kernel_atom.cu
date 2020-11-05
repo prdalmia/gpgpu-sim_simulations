@@ -57,7 +57,7 @@
 #define BIG_NUM 99999999
 //#include "denovo_util.h"
 //#include "gpuKernels_util.cu"
-#include "util.h"
+//#include "util.h"
 /**
  * @brief   min.+
  * @param   num_nodes  Number of vertices
@@ -68,7 +68,8 @@
  * @param   y          Output vector
  */
 __global__ void
-spmv_min_dot_plus_kernel(int *row,
+spmv_min_dot_plus_kernel(int num_nodes,
+                         int *row,
                          int *col,
                          int *data,
                          int *x,
@@ -88,7 +89,7 @@ spmv_min_dot_plus_kernel(int *row,
     */
     __syncthreads();
 
-    for (; tid < num_gpu_nodes; tid += blockDim.x * gridDim.x) {
+    for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
       //const int should_stop = (int)atomicXor(&stop[tid], 0);
       const int should_stop = stop[tid];
 
