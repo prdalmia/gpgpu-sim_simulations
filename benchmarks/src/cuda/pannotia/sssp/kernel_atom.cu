@@ -73,9 +73,7 @@ spmv_min_dot_plus_kernel(int *row,
                          int *data,
                          int *x,
                          int *y,
-                         int *stop,
-                         const int num_gpu_nodes,
-                         const int nodes_per_thread)
+                         int *stop)
 {
     // Get my workitem id
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
@@ -406,9 +404,8 @@ spmv_min_dot_plus_kernel(int *row,
   __global__ void
 vector_assign(int *x,
               int *y,
-              int *stop,
-              const int num_gpu_nodes,
-              const int nodes_per_thread)
+              int *stop, 
+              int num_nodes)
               
 {
   int tid = blockDim.x * blockIdx.x + threadIdx.x;
@@ -421,8 +418,8 @@ vector_assign(int *x,
   }
  */ 
   __syncthreads();
-
-  for (; tid < num_gpu_nodes; tid += blockDim.x * gridDim.x) {
+//AskMatt
+  for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
     const int x_val = x[tid];
     const int y_val = (int)atomicAdd(&y[tid], 0);
     //const int y_val = (int)atomicXor(&y[tid], 0);
@@ -457,91 +454,40 @@ vector_assign(int *x,
  * @param   x          the input vector
  * @param   y          the output vector
  */
-//  __global__ void
-//ell_min_dot_plus_kernel(const int num_nodes, const int height, int *col,
-//    int *data, unsigned int *x, unsigned int *y)
-//{
-//  // Get workitem id
-//  int tid = blockDim.x * blockIdx.x + threadIdx.x;
-//
-//  if (tid < num_nodes) {
-//    int mat_offset = tid;
-//    int min = x[tid];
-//
-//    // The vertices process a row of matrix (col-major)
-//    for (int i = 0; i < height; i++) {
-//      int mat_elem = data[mat_offset];
-//      int vec_elem = x[col[mat_offset]];
-//      if (mat_elem + vec_elem < min) {
-//        min = mat_elem + vec_elem;
-//      }
-//      mat_offset += num_nodes;
-//    }
-//    y[tid] = min;
-//  }
-//}
 
-/**
- * @brief   vector_init
- * @param   vector1      vector1
- * @param   vector2      vector2
- * @param   i            source vertex id
- * @param   num_nodes    number of vertices
- */
-//  __global__ void
-//vector_init(unsigned int *vector1, unsigned int *vector2, const int i, const int num_gpu_nodes, int nodes_per_thread)
-//{
-//  int tid = blockDim.x * blockIdx.x + threadIdx.x;
-//
-//  for (int i=0; i < nodes_per_thread; i++)
-//  {
-//    if (tid < num_gpu_nodes) {
-//      if (tid == i) {
-//        // If it is the source vertex
-//        vector1[tid] = 0;
-//        vector2[tid] = 0;
-//      } else {
-//        // If it a non-source vertex
-//        vector1[tid] = BIG_NUM;
-//        vector2[tid] = BIG_NUM;
-//      }
-//    } else {
-//      break;
-//    }
-//
-//    tid += blockDim.x * gridDim.x;
-//  }
-//  __syncthreads(); 
-//
-//  if(threadIdx.x == 0 || threadIdx.y == 0 || threadIdx.z == 0)
-//    __denovo_gpuEpilogue(65535); 
-//}
-
-/**
+ /**
  * @brief   vector_diff
  * @param   vector1      vector1
  * @param   vector2      vector2
  * @param   stop         termination variable
  * @param   num_nodes    number of vertices
  */
-//  __global__ void
-//vector_diff(unsigned int *vector1, unsigned int *vector2, int *stop, const int num_gpu_nodes, int nodes_per_thread)
-//{
-//  int tid = blockDim.x * blockIdx.x + threadIdx.x;
-//  for (int i=0; i<nodes_per_thread; i++)
-//  {
-//    if (tid < num_gpu_nodes) {
-//      if (vector2[tid] != vector1[tid]) {
-//        *stop = 1;
-//      }
-//    } else {
-//      break;
-//    }
-//    tid += blockDim.x * gridDim.x;
-//  }
-//  __syncthreads(); 
-//
-//  if(threadIdx.x == 0 || threadIdx.y == 0 || threadIdx.z == 0)
-//    __denovo_gpuEpilogue(65535); 
-//}
-//
+__global__ void
+vector_diff(int *vector1, int *vector2, int *stop, const int num_nodes)
+{
+    int tid = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (tid < num_nodes) {
+        if (vector2[tid] != vector1[tid]) {
+            *stop = 1;
+        }
+    }
+}
+
+__global__ void
+vector_init(int *vector1, int *vector2, const int i, const int num_nodes)
+{
+    int tid = blockDim.x * blockIdx.x + threadIdx.x;
+
+    if (tid < num_nodes) {
+        if (tid == i) {
+            // If it is the source vertex
+            vector1[tid] = 0;
+            vector2[tid] = 0;
+        } else {
+            // If it a non-source vertex
+            vector1[tid] = BIG_NUM;
+            vector2[tid] = BIG_NUM;
+        }
+    }
+}

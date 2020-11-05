@@ -226,7 +226,7 @@ int main(int argc, char **argv)
         // Launch the min.+ kernel
         spmv_min_dot_plus_kernel <<<grid, threads>>>(num_nodes, row_d, col_d,
                                                      data_d, vector_d1,
-                                                     vector_d2);
+                                                     vector_d2, stop_d);
 
         // Launch the check kernel
         vector_diff <<<grid, threads>>>(vector_d1, vector_d2,
