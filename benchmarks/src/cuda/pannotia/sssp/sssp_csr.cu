@@ -213,7 +213,7 @@ int main(int argc, char **argv)
     // Main computation loop
     for (int i = 1; i < num_nodes; i++) {
         // Reset the termination variable
-        stop[i] = 0;
+        stop = 0;
 
         // Copy the termination variable to the device
         err = cudaMemcpy(stop_d, &stop, sizeof(int), cudaMemcpyHostToDevice);
