@@ -371,17 +371,19 @@ pagerank1(int * row, int * col, int * data, float * page_rank1,
       );
     }
 
-    for (; edge < end; ++edge) {
+    asm volatile
+    (
+      ".reg .s32 aa1;\n\t"                    // Register for nid loaded from col
+      ".reg .s64 aa9;\n\t"                    // Register for casted nid value
+      ".reg .u64 aa17;\n\t"                   // Register for multiplied nid value as address
+      ".reg .u64 aa25;\n\t"                   // Register for final address to load from page_rank2
+      ".reg .f32 aa33;\n\t"                   // (Unused) Register for atomicAdd
+    );
+      for (; edge < end; ++edge) {
       int * const col_base_addr = &col[edge];
 
       asm volatile
       (
-        ".reg .s32 aa1;\n\t"                    // Register for nid loaded from col
-        ".reg .s64 aa9;\n\t"                    // Register for casted nid value
-        ".reg .u64 aa17;\n\t"                   // Register for multiplied nid value as address
-        ".reg .u64 aa25;\n\t"                   // Register for final address to load from page_rank2
-        ".reg .f32 aa33;\n\t"                   // (Unused) Register for atomicAdd
-
         "ld.s32 aa1, [%0+0];\n\t"               // Load nid
         //"cvt.s64.s32 a9, a1;\n\t"              // Cast nid value
         "mul.wide.s32 aa17, aa1, 4;\n\t"         // Multiply nid for page_rank2 address calculation
