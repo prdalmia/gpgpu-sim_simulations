@@ -62,7 +62,7 @@
 #include <sys/time.h>
 #include "../graph_parser/parse.h"
 #include "../graph_parser/util.h"
-#include "kernel.cu"
+//#include "kernel.cu"
 
 #ifdef GEM5_FUSION
 #include <stdint.h>
@@ -76,7 +76,12 @@ void m5_work_end(uint64_t workid, uint64_t threadid);
 #define ITER 20
 
 void print_vectorf(float *vector, int num);
-
+__global__ void inibuffer(int *row, float *page_rank1, float *page_rank2, const int num_nodes,
+          const int num_edges);
+__global__ void pagerank2(int * row, int * col, int * data, float * page_rank1,
+            float * page_rank2, const int num_nodes, const int num_edges);
+__global__ void pagerank1(int * row, int * col, int * data, float * page_rank1,
+                float * page_rank2, const int num_nodes, const int num_edges);
 int main(int argc, char **argv)
 {
     char *tmpchar;
