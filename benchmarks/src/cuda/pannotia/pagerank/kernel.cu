@@ -53,7 +53,8 @@
  * website at http://www.bis.doc.gov/.                                              *
  *                                                                                  *
 \************************************************************************************/
-
+#ifndef SSSP_KERNEL_CU_
+#define SSSP_KERNEL_CU_
 /**
  * @brief   pagerank1
  * @param   row         csr pointer array
@@ -520,3 +521,4 @@ pagerank2(int * row, int * col, int * data, float * page_rank1,
 //    __denovo_gpuEpilogue(READ_ONLY_REGION); // include to be safe, not used in this kernel
 //  }
 //}
+#endif
