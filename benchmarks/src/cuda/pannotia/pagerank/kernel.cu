@@ -68,7 +68,7 @@
  * @param   pgRk2Reg    pagerank array 2 region
  */
 __global__ void
-pagerank1(int * row, int * col, float * data, float * page_rank1,
+pagerank1(int * row, int * col, int * data, float * page_rank1,
           float * page_rank2, const int num_nodes, const int num_edges)
 {
   // Get my workitem id
@@ -416,7 +416,7 @@ pagerank1(int * row, int * col, float * data, float * page_rank1,
  * @param   pgRk2Reg    pagerank array 2 region
  */
 __global__ void
-pagerank2(int * row, int * col, float * data, float * page_rank1,
+pagerank2(int * row, int * col, int * data, float * page_rank1,
           float * page_rank2, const int num_nodes, const int num_edges)
 {
   // Get my workitem id
@@ -452,6 +452,26 @@ pagerank2(int * row, int * col, float * data, float * page_rank1,
   }
   */
 }
+
+/**
+ * @brief   inibuffer
+ * @param   row         csr pointer array
+ * @param   page_rank1  pagerank array 1
+ * @param   page_rank2  pagerank array 2
+ * @param   num_nodes   number of vertices
+ */
+ __global__ void
+ inibuffer(int *row, float *page_rank1, float *page_rank2, const int num_nodes,
+           const int num_edges)
+ {
+     // Get my thread id
+     int tid = blockDim.x * blockIdx.x + threadIdx.x;
+ 
+     if (tid < num_nodes) {
+         page_rank1[tid] = 1 / (float)num_nodes;
+         page_rank2[tid] = 0.0f;
+     }
+ }
 
 ///**
 // * @brief   inibuffer
