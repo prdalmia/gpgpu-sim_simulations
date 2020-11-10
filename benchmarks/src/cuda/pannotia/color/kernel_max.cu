@@ -58,10 +58,9 @@
 //include "denovo_util.h"
 //#include "gpuKernels_util.cu"
 
-__global__ void color1(int *row, int *col, int *node_value,
-                       int *col_cnt, int *color_array,
-                       int *cont, int *max_d, const int color,
-                       const int num_nodes, const int num_edges)
+__global__ void color1(int *row, int *col, int *node_value, int *color_array,
+    int *stop, int *max_d, const int color,
+    const int num_nodes, const int num_edges)
 {
     // Get my thread workitem id
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
