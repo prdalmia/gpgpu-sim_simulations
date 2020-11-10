@@ -53,8 +53,7 @@
  * website at http://www.bis.doc.gov/.                                              *
  *                                                                                  *
 \************************************************************************************/
-#include "denovo_util.h"
-#include "gpuKernels_util.cu"
+
 //#define BIGNUM 99999999
 
 /**
