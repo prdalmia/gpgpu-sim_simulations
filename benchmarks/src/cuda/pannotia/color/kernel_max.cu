@@ -1097,6 +1097,7 @@ __global__ void color1_push(int *row, int *col, int *node_value,
 
                 asm volatile
                 (
+                    "{\n\t"
                     ".reg .s32 a1;\n\t"                                  // Register for nid loaded from col
                     ".reg .s32 a33;\n\t"                                 // Register for out_deg loaded from col_cnt
                     ".reg .u64 a9;\n\t"                                  // Register for multiplied nid value as address
@@ -1121,9 +1122,8 @@ __global__ void color1_push(int *row, int *col, int *node_value,
                     "@!a49 bra COLOR1_PUSH_NEIGH_END_1;\n\t"             // Check if node is well connected
                     "atom.max.s32 a79, [a25], m99;\n\t"                  // Find max
                     "mov.s32 m100, 1;\n\t"                               // Set local_cont
-
                     "COLOR1_PUSH_NEIGH_END_1:\n\t"
-
+                    "}"
                     :                                                    // Outputs
                     : "l"(col_base_addr), "l"(col_cnt_base_addr)         // Inputs
                 );
