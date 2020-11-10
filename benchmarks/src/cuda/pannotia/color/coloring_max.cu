@@ -62,7 +62,7 @@
 #include <sys/time.h>
 #include "../graph_parser/parse.h"
 #include "../graph_parser/util.h"
-#include "kernel_max.cu"
+#include "kernel_max_orig.cu"
 
 #ifdef GEM5_FUSION
 #include <stdint.h>
