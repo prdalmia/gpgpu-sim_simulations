@@ -366,6 +366,7 @@ spmv_min_dot_plus_kernel(int num_nodes,
                         
                                   asm volatile
                                   (
+                                    "{\n\t"
                                     ".reg .s32 a1;\n\t"                                  // Register for nid loaded from col
                                     ".reg .s32 a9;\n\t"                                  // Register for data
                                     ".reg .u64 a17;\n\t"                                 // Register for multiplied nid value as address
@@ -379,7 +380,7 @@ spmv_min_dot_plus_kernel(int num_nodes,
                                     "add.u64 a25, m99, a17;\n\t"                         // Final address calculation for y
                                     "add.s32 a33, a9, m100;\n\t"                         // Add data + min
                                     "atom.min.s32 a41, [a25], a33;\n\t"                  // Do min for y and data + min
-                        
+                                    "}"
                                     :                                                    // Outputs
                                     : "l"(col_base_addr), "l"(data_base_addr)            // Inputs
                                   );
