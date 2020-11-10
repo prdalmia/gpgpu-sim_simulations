@@ -494,9 +494,10 @@ __global__ void color1(int *row, int *col, int *node_value, int *color_array,
                     "COLOR1_PULL_PRED_BODY_1_1:\n\t"
                     "@!a41 bra COLOR1_PULL_NEIGH_END_1;\n\t"             // Check if node is processed
                     "max.s32 m101, m101, a79;\n\t"                       // Find max
-                    "mov.s32 m100, 1;\n\t"                               // Set local_cont
+                    "mov.s32 m100, 1;\n\t"
+                    "}"                               // Set local_cont
                     "COLOR1_PULL_NEIGH_END_1:\n\t"
-                    "}"
+                    
                     :                                                    // Outputs
                     : "l"(col_base_addr)                                 // Inputs
                 );
@@ -1122,8 +1123,9 @@ __global__ void color1_push(int *row, int *col, int *node_value,
                     "@!a49 bra COLOR1_PUSH_NEIGH_END_1;\n\t"             // Check if node is well connected
                     "atom.max.s32 a79, [a25], m99;\n\t"                  // Find max
                     "mov.s32 m100, 1;\n\t"                               // Set local_cont
-                    "COLOR1_PUSH_NEIGH_END_1:\n\t"
                     "}"
+                    "COLOR1_PUSH_NEIGH_END_1:\n\t"
+                    
                     :                                                    // Outputs
                     : "l"(col_base_addr), "l"(col_cnt_base_addr)         // Inputs
                 );
@@ -1230,7 +1232,7 @@ __global__ void color2_push(int *node_value, int *color_array, int *max_d,
                 // Assign a color
                 color_array[tid] = color;
             } else {
-                atomicOr(&max_d[tid], -1);
+                atomicExch(&max_d[tid], -1);
             }
         }
     }
