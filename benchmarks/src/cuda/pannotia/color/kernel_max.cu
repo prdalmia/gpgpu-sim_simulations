@@ -474,6 +474,7 @@ __global__ void color1(int *row, int *col, int *node_value, int *color_array,
 
                 asm volatile
                 (
+                    "{\n\t"
                     ".reg .s32 a1;\n\t"                                  // Register for nid loaded from col
                     ".reg .u64 a9;\n\t"                                  // Register for multiplied nid value as address
                     ".reg .u64 a17;\n\t"                                 // Register for final address to load from color
@@ -494,9 +495,8 @@ __global__ void color1(int *row, int *col, int *node_value, int *color_array,
                     "@!a41 bra COLOR1_PULL_NEIGH_END_1;\n\t"             // Check if node is processed
                     "max.s32 m101, m101, a79;\n\t"                       // Find max
                     "mov.s32 m100, 1;\n\t"                               // Set local_cont
-
                     "COLOR1_PULL_NEIGH_END_1:\n\t"
-
+                    "}"
                     :                                                    // Outputs
                     : "l"(col_base_addr)                                 // Inputs
                 );
