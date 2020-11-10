@@ -1209,8 +1209,7 @@ __global__ void color1_push(int *row, int *col, int *node_value,
 // only difference here is we need to reset max_d to -1 if this node is still unset
 __global__ void color2_push(int *node_value, int *color_array, int *max_d,
                             const int color, const int num_nodes,
-                            const int num_edges, region_t default_reg,
-                            region_t max_reg)
+                            const int num_edges)
 {
     // Get my workitem id
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
