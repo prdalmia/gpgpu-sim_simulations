@@ -102,6 +102,8 @@ int main(int argc, char **argv)
         csr = parseMetis_transpose(tmpchar, &num_nodes, &num_edges, directed);
     } else if (file_format == 0) {
         csr = parseCOO_transpose(tmpchar, &num_nodes, &num_edges, directed);
+    } else if (file_format == 2)             // Matrix market
+        csr = parseMM(tmpchar, &num_nodes, &num_edges, directed, 0);
     } else {
         printf("reserve for future");
         exit(1);
