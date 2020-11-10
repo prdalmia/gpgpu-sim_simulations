@@ -55,7 +55,7 @@
 \************************************************************************************/
 
 
-#//include "denovo_util.h"
+//include "denovo_util.h"
 //#include "gpuKernels_util.cu"
 
 __global__ void color1(int *row, int *col, int *node_value,
