@@ -443,7 +443,7 @@ pagerank2(int * row, int * col, int * data, float * page_rank1,
       semantics needed here.
      */
     page_rank1[tid]	= 0.15 / (float)num_nodes + 0.85 * atomicAdd(&(page_rank2[tid]), 0);
-    atomicOr((int *)&(page_rank2[tid]), 0); //page_rank2[tid] = 0.0f;
+    atomicExch((int *)&(page_rank2[tid]), 0); //page_rank2[tid] = 0.0f;
   }
 /*
   if (threadIdx.x == 0) {
