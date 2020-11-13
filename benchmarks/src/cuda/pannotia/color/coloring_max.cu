@@ -140,6 +140,7 @@ int main(int argc, char **argv)
     int *row_d;
     int *col_d;
     int *max_d;
+    int *col_cnt_d;
 
     int *color_d;
     int *node_value_d;
