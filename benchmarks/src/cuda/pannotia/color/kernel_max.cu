@@ -666,7 +666,7 @@ __global__ void color1_push(int *row, int *col, int *node_value, int *color_arra
               : "r"(this_node_val), "r"(cont_tid),               // Inputs
                 "l"(color_array), "l"(max_d)
             );
-
+/*
             //// Navigate the neighbor list, update max with this value
             for (int edge = start; edge < end; edge++) {
                 const int nid = col[edge];
@@ -678,7 +678,7 @@ __global__ void color1_push(int *row, int *col, int *node_value, int *color_arra
                     atomicMax(&max_d[nid], this_node_val);
                 }
             }
-
+*/
             for (edge = row_start; edge <= (row_end - 8); edge += 8) {
                 int * const col_base_addr = &col[edge];
                 int * const col_cnt_base_addr = &col_cnt[edge];
