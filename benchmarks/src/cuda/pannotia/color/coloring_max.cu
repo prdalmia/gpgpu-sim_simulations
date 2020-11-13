@@ -132,7 +132,7 @@ int main(int argc, char **argv)
         const int end_edge = csr->row_array[i + 1];
 
         for (int edge = start_edge; edge < end_edge; ++edge) {
-            const int neighbor = csr->row_array[edge];
+            const int neighbor = csr->col_array[edge];
             const int neigh_out_deg = csr->row_array[neighbor + 1] - csr->row_array[neighbor];
             col_cnt[edge] = neigh_out_deg;
         }
@@ -303,6 +303,7 @@ int main(int argc, char **argv)
     // Free host-side buffers
     free(node_value);
     free(color);
+    free(col_cnt);
     csr->freeArrays();
     free(csr);
 
@@ -313,6 +314,7 @@ int main(int argc, char **argv)
     cudaFree(color_d);
     cudaFree(node_value_d);
     cudaFree(stop_d);
+    cudaFree(col_cnt_d);
 
     return 0;
 
