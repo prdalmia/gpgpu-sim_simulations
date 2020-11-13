@@ -668,16 +668,16 @@ __global__ void color1_push(int *row, int *col, int *node_value, int *color_arra
             );
 
             //// Navigate the neighbor list, update max with this value
-            //for (int edge = start; edge < end; edge++) {
-            //    const int nid = col[edge];
-            //    const int neigh_out_deg = col_cnt[edge];
+            for (int edge = start; edge < end; edge++) {
+                const int nid = col[edge];
+                const int neigh_out_deg = col_cnt[edge];
 
-            //    // Determine if the vertex value is the maximum in the neighborhood
-            //    if (color_array[nid] == -1 && neigh_out_deg > 1) {
-            //        cont_tid = true;
-            //        atomicMax(&max_d[nid], this_node_val);
-            //    }
-            //}
+                // Determine if the vertex value is the maximum in the neighborhood
+                if (color_array[nid] == -1 && neigh_out_deg > 1) {
+                    cont_tid = true;
+                    atomicMax(&max_d[nid], this_node_val);
+                }
+            }
 
             for (edge = row_start; edge <= (row_end - 8); edge += 8) {
                 int * const col_base_addr = &col[edge];

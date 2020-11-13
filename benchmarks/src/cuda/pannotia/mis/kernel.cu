@@ -55,7 +55,11 @@
 \************************************************************************************/
 
 //#define BIGNUM 99999999
+#define EPSILON 0.0000001
 
+#define NOT_PROCESSED -1
+#define INACTIVE      -2
+#define INDEPENDENT   2
 /**
 * init kernel
 * @param s_array   set array
