@@ -623,9 +623,10 @@ __global__ void color2(int *node_value, int *color_array, int *max_d,
 
 // push version of color1- use atomicMax to update every neighbor for assigned node
 // with max of current value and this nodes value
-__global__ void color1_push(int *row, int *col, int *node_value, int *color_array,
-    int *stop, int *max_d, const int color,
-    const int num_nodes, const int num_edges)
+__global__ void color1_push(int *row, int *col, int *node_value,
+int *col_cnt, int *color_array,
+int *cont, int *max_d, const int color,
+const int num_nodes, const int num_edges)
 {
     // Get my thread workitem id
     int tid = blockIdx.x * blockDim.x + threadIdx.x;

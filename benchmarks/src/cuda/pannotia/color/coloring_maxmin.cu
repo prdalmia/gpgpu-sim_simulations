@@ -232,8 +232,8 @@ int main(int argc, char **argv)
         }
 
         // Launch the color kernel 1
-        color1 <<< grid, threads >>>(row_d, col_d, node_value_d, color_d,
-                                     stop_d, max_d, min_d, graph_color,
+        color1 <<< grid, threads >>>(row_d, col_d, node_value_d, col_cnt_d, color_d,
+                                     stop_d, max_d, graph_color,
                                      num_nodes, num_edges);
 
         // Launch the color kernel 2

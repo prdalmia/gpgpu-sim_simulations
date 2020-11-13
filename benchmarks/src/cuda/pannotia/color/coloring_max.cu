@@ -126,7 +126,17 @@ int main(int argc, char **argv)
         color[i] = -1;
         node_value[i] = rand() % RANGE;
     }
+    int *col_cnt = (int *)malloc(num_edges * sizeof(int));
+    for (int i = 0; i < num_nodes; ++i) {
+        const int start_edge = csr->row_array[i];
+        const int end_edge = csr->row_array[i + 1];
 
+        for (int edge = start_edge; edge < end_edge; ++edge) {
+            const int neighbor = csr->row_array[edge];
+            const int neigh_out_deg = csr->row_array[neighbor + 1] - csr->row_array[neighbor];
+            col_cnt[edge] = neigh_out_deg;
+        }
+    }
     int *row_d;
     int *col_d;
     int *max_d;
@@ -146,6 +156,13 @@ int main(int argc, char **argv)
         fprintf(stderr, "ERROR: cudaMalloc col_d (size:%d): %s\n",  num_edges , cudaGetErrorString(err));
         return -1;
     }
+
+    err = cudaMalloc(&col_cnt_d, num_edges * sizeof(int));
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMalloc col_d (size:%d): %s\n",  num_edges , cudaGetErrorString(err));
+        return -1;
+    }
+
 
     // Termination variable
     err = cudaMalloc(&stop_d, sizeof(int));
@@ -202,6 +219,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    err = cudaMemcpy(col_cnt_d, col_cnt, num_edges * sizeof(int), cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMemcpy col_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        return -1;
+    }
+
     err = cudaMemcpy(node_value_d, node_value, num_nodes * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         fprintf(stderr, "ERROR: cudaMemcpy node_value_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
@@ -232,12 +255,12 @@ int main(int argc, char **argv)
         }
 
         // Launch the color kernel 1
-        color1 <<< grid, threads >>>(row_d, col_d, node_value_d, color_d,
-                                     stop_d, max_d, graph_color, num_nodes,
+        color1_push <<< grid, threads >>>(row_d, col_d, node_value_d, color_d,
+                                     col_cnt_d, max_d, graph_color, num_nodes,
                                      num_edges);
 
         // Launch the color kernel 2
-        color2 <<< grid, threads >>>(node_value_d, color_d, max_d, graph_color,
+        color2_push <<< grid, threads >>>(node_value_d, color_d, max_d, graph_color,
                                      num_nodes, num_edges);
 
         err = cudaMemcpy(&stop, stop_d, sizeof(int), cudaMemcpyDeviceToHost);
