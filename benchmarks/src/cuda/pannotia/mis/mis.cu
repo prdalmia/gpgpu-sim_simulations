@@ -74,7 +74,11 @@ void m5_work_end(uint64_t workid, uint64_t threadid);
 #endif
 
 #define RANGE 2048
+#define EPSILON 0.0000001
 
+#define NOT_PROCESSED -1
+#define INACTIVE      -2
+#define INDEPENDENT   2
 void dump2file(int *adjmatrix, int num_nodes);
 void print_vector(int *vector, int num);
 void print_vectorf(float *vector, int num);

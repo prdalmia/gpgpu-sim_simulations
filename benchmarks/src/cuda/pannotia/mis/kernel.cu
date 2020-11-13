@@ -92,7 +92,7 @@ init(int *s_array, int *c_array, int *cu_array, int num_nodes, int num_edges)
 */
 __global__ void
 mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
-     int *min_array, bool *cont, int num_gpu_nodes, int num_edges,
+     int *min_array, bool *cont, int num_gpu_nodes, int num_edges
 )
 {
     const int tx = threadIdx.x;

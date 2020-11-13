@@ -100,15 +100,15 @@ spmv_min_dot_plus_kernel(int num_nodes,
                         
                                 const int min = x[tid];
                         
-                                //for (int i = row_start; i < row_end; i++) {
-                                //  const int col_i = col[i];
-                                //  const int data_i = data[i];
+                                for (int i = row_start; i < row_end; i++) {
+                                  const int col_i = col[i];
+                                 const int data_i = data[i];
                         
-                                //  int * const y_col_addr = &y[col_i];
-                                //  const int new_val = data_i + min;
+                                  int * const y_col_addr = &y[col_i];
+                                  const int new_val = data_i + min;
                         
-                                //  atomicMin(y_col_addr, new_val);
-                                //}
+                                  atomicMin(y_col_addr, new_val);
+                                }
                         
                                 asm volatile
                                 (
