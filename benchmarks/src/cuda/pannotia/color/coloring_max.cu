@@ -114,10 +114,22 @@ int main(int argc, char **argv)
     }
 
     // Allocate the vertex value array
+    int block_size = 256;
+    int num_blocks = (num_nodes + block_size - 1) / block_size;
+
+    // Set up kernel dimensions
+    dim3 threads(block_size,  1, 1);
+    dim3 grid(num_blocks, 1,  1);
+    const int num_gpu_threads = grid.x * threads.x;
+    int *cont = (int *)malloc(num_gpu_threads * sizeof(int));
+    for (int i = 0; i < num_gpu_threads; i++) {
+        cont[i] = false;
+    }
     int *node_value = (int *)malloc(num_nodes * sizeof(int));
     if (!node_value) fprintf(stderr, "node_value malloc failed\n");
     // Allocate the color array
     int *color = (int *)malloc(num_nodes * sizeof(int));
+    int *cont = (int *)malloc(num_nod * sizeof(int));
     if (!color) fprintf(stderr, "color malloc failed\n");
 
     // Initialize all the colors to -1
@@ -147,6 +159,11 @@ int main(int argc, char **argv)
     int *stop_d;
 
     // Create device-side buffers for the graph
+    err = cudaMalloc(&row_d, num_gpu_threads * sizeof(int));
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n",  num_nodes , cudaGetErrorString(err));
+        return -1;
+    }
     err = cudaMalloc(&row_d, num_nodes * sizeof(int));
     if (err != cudaSuccess) {
         fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n",  num_nodes , cudaGetErrorString(err));
@@ -202,6 +219,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    err = cudaMemcpy(cont_d, cont, num_gpu_threads * sizeof(int), cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMemcpy color_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        return -1;
+    }
+
     err = cudaMemcpy(max_d, color, num_nodes * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
         fprintf(stderr, "ERROR: cudaMemcpy max_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
@@ -232,12 +255,7 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    int block_size = 256;
-    int num_blocks = (num_nodes + block_size - 1) / block_size;
 
-    // Set up kernel dimensions
-    dim3 threads(block_size,  1, 1);
-    dim3 grid(num_blocks, 1,  1);
 
     int stop = 1;
     int graph_color = 1;
@@ -256,8 +274,8 @@ int main(int argc, char **argv)
         }
 
         // Launch the color kernel 1
-        color1_push <<< grid, threads >>>(row_d, col_d, node_value_d, col_cnt_d, color_d,
-                                     stop_d, max_d, graph_color, num_nodes,
+        color1_pusho <<< grid, threads >>>(row_d, col_d, node_value_d, col_cnt_d, color_d,
+                                     cont, max_d, graph_color, num_nodes,
                                      num_edges);
 
         // Launch the color kernel 2
@@ -303,6 +321,7 @@ int main(int argc, char **argv)
     // Free host-side buffers
     free(node_value);
     free(color);
+    free(cont);
     free(col_cnt);
     csr->freeArrays();
     free(csr);
@@ -315,6 +334,7 @@ int main(int argc, char **argv)
     cudaFree(node_value_d);
     cudaFree(stop_d);
     cudaFree(col_cnt_d);
+    cudaFree(cont_d);
 
     return 0;
 

@@ -649,7 +649,7 @@ const int num_nodes, const int num_edges)
             const int row_end = row[tid + 1];
 
             const int this_node_val = node_value[tid];
-
+/*
             asm volatile
             (
               // Temp Register
@@ -667,9 +667,10 @@ const int num_nodes, const int num_edges)
               : "r"(this_node_val), "r"(cont_tid),               // Inputs
                 "l"(color_array), "l"(max_d)
             );
-/*
+*/
+            
             //// Navigate the neighbor list, update max with this value
-            for (int edge = start; edge < end; edge++) {
+            for (int edge = row_start; edge < row_end; edge++) {
                 const int nid = col[edge];
                 const int neigh_out_deg = col_cnt[edge];
 
@@ -679,7 +680,7 @@ const int num_nodes, const int num_edges)
                     atomicMax(&max_d[nid], this_node_val);
                 }
             }
-*/
+/*
             for (edge = row_start; edge <= (row_end - 8); edge += 8) {
                 int * const col_base_addr = &col[edge];
                 int * const col_cnt_base_addr = &col_cnt[edge];
@@ -1140,7 +1141,7 @@ const int num_nodes, const int num_edges)
         }
     }
 
-    cont[blockIdx.x * blockDim.x + threadIdx.x] = cont_tid;
+    
 /*
     if (threadIdx.x == 0) {
         __denovo_gpuEpilogue(SPECIAL_REGION);
@@ -1149,61 +1150,62 @@ const int num_nodes, const int num_edges)
         __denovo_gpuEpilogue(max_reg);
     }
     */
+    cont[blockIdx.x * blockDim.x + threadIdx.x] = cont_tid;
 }
 
 
-// // push version of color1- use atomicMax to update every neighbor for assigned node
-// // with max of current value and this nodes value
-// __global__ void color1_push(int *row, int *col, int *node_value,
-//                             int *col_cnt, int *color_array,
-//                             int *cont, int *max_d, const int color,
-//                             const int num_nodes, const int num_edges,
-//                             region_t default_reg, region_t max_reg)
-// {
-//     // Get my thread workitem id
-//     int tid = blockIdx.x * blockDim.x + threadIdx.x;
-//     int cont_tid = false;
-// 
-//     if (threadIdx.x == 0) {
-//         __denovo_setAcquireRegion(SPECIAL_REGION);
-//         __denovo_addAcquireRegion(READ_ONLY_REGION);
-//         __denovo_addAcquireRegion(default_reg);
-//         __denovo_addAcquireRegion(max_reg);
-//     }
-//     __syncthreads();
-// 
-//     for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
-//         // If the vertex is still not colored
-//         if (color_array[tid] == -1) {
-//             // Get the start and end pointer of the neighbor list
-//             const int start = row[tid];
-//             const int end = row[tid + 1];
-// 
-//             const int this_node_val = node_value[tid];
-// 
-//             // Navigate the neighbor list, update max with this value
-//             for (int edge = start; edge < end; edge++) {
-//                 const int nid = col[edge];
-//                 const int neigh_out_deg = col_cnt[edge];
-// 
-//                 // Determine if the vertex value is the maximum in the neighborhood
-//                 if (color_array[nid] == -1 && neigh_out_deg > 1) {
-//                     cont_tid = true;
-//                     atomicMax(&max_d[nid], this_node_val);
-//                 }
-//             }
-//         }
-//     }
-// 
-//     cont[blockIdx.x * blockDim.x + threadIdx.x] = cont_tid;
-// 
-//     if (threadIdx.x == 0) {
-//         __denovo_gpuEpilogue(SPECIAL_REGION);
-//         __denovo_gpuEpilogue(READ_ONLY_REGION);
-//         __denovo_gpuEpilogue(default_reg);
-//         __denovo_gpuEpilogue(max_reg);
-//     }
-// }
+ // push version of color1- use atomicMax to update every neighbor for assigned node
+ // with max of current value and this nodes value
+ __global__ void color1_pusho(int *row, int *col, int *node_value,
+                             int *col_cnt, int *color_array,
+                             int *cont, int *max_d, const int color,
+                             const int num_nodes, const int num_edges)
+ {
+     // Get my thread workitem id
+     int tid = blockIdx.x * blockDim.x + threadIdx.x;
+     int cont_tid = false;
+ /*
+     if (threadIdx.x == 0) {
+         __denovo_setAcquireRegion(SPECIAL_REGION);
+         __denovo_addAcquireRegion(READ_ONLY_REGION);
+         __denovo_addAcquireRegion(default_reg);
+         __denovo_addAcquireRegion(max_reg);
+     }
+     __syncthreads();
+ */
+     for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
+         // If the vertex is still not colored
+         if (color_array[tid] == -1) {
+             // Get the start and end pointer of the neighbor list
+             const int start = row[tid];
+             const int end = row[tid + 1];
+ 
+             const int this_node_val = node_value[tid];
+ 
+             // Navigate the neighbor list, update max with this value
+             for (int edge = start; edge < end; edge++) {
+                 const int nid = col[edge];
+                 const int neigh_out_deg = col_cnt[edge];
+ 
+                 // Determine if the vertex value is the maximum in the neighborhood
+                 if (color_array[nid] == -1 && neigh_out_deg > 1) {
+                     cont_tid = true;
+                     atomicMax(&max_d[nid], this_node_val);
+                 }
+             }
+         }
+     }
+ 
+     cont[blockIdx.x * blockDim.x + threadIdx.x] = cont_tid;
+ /*
+     if (threadIdx.x == 0) {
+         __denovo_gpuEpilogue(SPECIAL_REGION);
+         __denovo_gpuEpilogue(READ_ONLY_REGION);
+         __denovo_gpuEpilogue(default_reg);
+         __denovo_gpuEpilogue(max_reg);
+     }
+*/
+    }
 
 
 // only difference here is we need to reset max_d to -1 if this node is still unset

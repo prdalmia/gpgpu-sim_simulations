@@ -109,7 +109,7 @@ spmv_min_dot_plus_kernel(int num_nodes,
                         
                                   atomicMin(y_col_addr, new_val);
                                 }
-                        
+                        /*
                                 asm volatile
                                 (
                                   // Temp Register
@@ -385,8 +385,10 @@ spmv_min_dot_plus_kernel(int num_nodes,
                                     : "l"(col_base_addr), "l"(data_base_addr)            // Inputs
                                   );
                                 }
+                                */
                               }
-                            }
+                              
+                              }
                         /*
                             if (threadIdx.x == 0) {
                               __denovo_gpuEpilogue(SPECIAL_REGION);
