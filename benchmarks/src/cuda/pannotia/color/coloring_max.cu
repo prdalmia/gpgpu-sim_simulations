@@ -282,7 +282,7 @@ int main(int argc, char **argv)
         color2_push <<< grid, threads >>>(node_value_d, color_d, max_d, graph_color,
                                      num_nodes, num_edges);
 
-        err = cudaMemcpy(&cont, cont_d, sizeof(int), cudaMemcpyDeviceToHost);
+        err = cudaMemcpy(&cont, cont_d, sizeof(int)*num_gpu_threads, cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
         }
