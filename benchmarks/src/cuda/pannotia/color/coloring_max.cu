@@ -263,8 +263,8 @@ int main(int argc, char **argv)
     // Main computation loop
     double timer3 = gettime();
    bool conti = true;
-    while (conti) {
-    //for (int i = 0; i < num_nodes; i++) {
+    //while (conti) {
+    for (int i = 0; i < num_nodes; i++) {
         stop = 0;
 
         // Copy the termination variable to the device
