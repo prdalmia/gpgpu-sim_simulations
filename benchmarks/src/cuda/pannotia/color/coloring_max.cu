@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 
     err = cudaMemcpy(col_cnt_d, col_cnt, num_edges * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMemcpy col_d (size:%d) => %s\n", num_edges, cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMemcpy col_cnt_d (size:%d) => %s\n", num_edges, cudaGetErrorString(err));
         return -1;
     }
 
@@ -282,7 +282,7 @@ int main(int argc, char **argv)
         color2_push <<< grid, threads >>>(node_value_d, color_d, max_d, graph_color,
                                      num_nodes, num_edges);
 
-        err = cudaMemcpy(&stop, stop_d, sizeof(int), cudaMemcpyDeviceToHost);
+        err = cudaMemcpy(&cont, cont_d, sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
         }
