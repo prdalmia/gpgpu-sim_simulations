@@ -275,7 +275,7 @@ int main(int argc, char **argv)
 
         // Launch the color kernel 1
         color1_pusho <<< grid, threads >>>(row_d, col_d, node_value_d, col_cnt_d, color_d,
-                                     cont, max_d, graph_color, num_nodes,
+                                     cont_d, max_d, graph_color, num_nodes,
                                      num_edges);
 
         // Launch the color kernel 2
