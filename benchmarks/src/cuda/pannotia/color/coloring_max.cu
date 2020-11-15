@@ -287,14 +287,14 @@ int main(int argc, char **argv)
             fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
         }
 
-        cont = false;
+        bool conti = false;
         for (int j = 0; j < num_gpu_threads; ++j) {
             if (cont[j]) {
-                cont = true;
+                conti = true;
                 break;
             }
         }
-        if (!cont) {
+        if (!conti) {
             break;
         }
 
