@@ -129,7 +129,6 @@ int main(int argc, char **argv)
     if (!node_value) fprintf(stderr, "node_value malloc failed\n");
     // Allocate the color array
     int *color = (int *)malloc(num_nodes * sizeof(int));
-    int *cont = (int *)malloc(num_nod * sizeof(int));
     if (!color) fprintf(stderr, "color malloc failed\n");
 
     // Initialize all the colors to -1
@@ -157,6 +156,7 @@ int main(int argc, char **argv)
     int *color_d;
     int *node_value_d;
     int *stop_d;
+    int *cont_d;
 
     // Create device-side buffers for the graph
     err = cudaMalloc(&row_d, num_gpu_threads * sizeof(int));
