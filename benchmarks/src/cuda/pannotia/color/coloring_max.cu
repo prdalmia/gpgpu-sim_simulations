@@ -263,8 +263,8 @@ int main(int argc, char **argv)
     // Main computation loop
     double timer3 = gettime();
 
-    while (cont) {
-
+   // while (cont) {
+    for (int i = 0; i < num_nodes; i++) {
         stop = 0;
 
         // Copy the termination variable to the device
@@ -286,6 +286,18 @@ int main(int argc, char **argv)
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
         }
+
+        cont = false;
+        for (int j = 0; j < num_gpu_threads; ++j) {
+            if (cont[j]) {
+                cont = true;
+                break;
+            }
+        }
+        if (!cont) {
+            break;
+        }
+
 
         // Increment the color for the next iter
         graph_color++;
