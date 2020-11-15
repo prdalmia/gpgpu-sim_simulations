@@ -262,7 +262,7 @@ int main(int argc, char **argv)
 
     // Main computation loop
     double timer3 = gettime();
-
+   bool conti;
     while (conti) {
     //for (int i = 0; i < num_nodes; i++) {
         stop = 0;
@@ -287,7 +287,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
         }
 
-        bool conti = false;
+        conti = false;
         for (int j = 0; j < num_gpu_threads; ++j) {
             if (cont[j]) {
                 conti = true;
