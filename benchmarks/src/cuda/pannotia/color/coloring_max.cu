@@ -159,9 +159,9 @@ int main(int argc, char **argv)
     int *cont_d;
 
     // Create device-side buffers for the graph
-    err = cudaMalloc(&row_d, num_gpu_threads * sizeof(int));
+    err = cudaMalloc(&cont_d, num_gpu_threads * sizeof(int));
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n",  num_nodes , cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMalloc cont_d (size:%d) => %s\n",  num_gpu_threads , cudaGetErrorString(err));
         return -1;
     }
     err = cudaMalloc(&row_d, num_nodes * sizeof(int));
@@ -221,7 +221,7 @@ int main(int argc, char **argv)
 
     err = cudaMemcpy(cont_d, cont, num_gpu_threads * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMemcpy color_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMemcpy cont_d (size:%d) => %s\n", num_gpu_threads, cudaGetErrorString(err));
         return -1;
     }
 
@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 
     err = cudaMemcpy(col_cnt_d, col_cnt, num_edges * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMemcpy col_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMemcpy col_d (size:%d) => %s\n", num_edges, cudaGetErrorString(err));
         return -1;
     }
 
