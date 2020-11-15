@@ -263,7 +263,7 @@ int main(int argc, char **argv)
     // Main computation loop
     double timer3 = gettime();
 
-    while (stop) {
+    while (cont) {
 
         stop = 0;
 
