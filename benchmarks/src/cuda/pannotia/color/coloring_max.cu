@@ -262,7 +262,7 @@ int main(int argc, char **argv)
 
     // Main computation loop
     double timer3 = gettime();
-   bool conti;
+   bool conti = true;
     while (conti) {
     //for (int i = 0; i < num_nodes; i++) {
         stop = 0;
