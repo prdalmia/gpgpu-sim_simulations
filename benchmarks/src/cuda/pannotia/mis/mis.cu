@@ -255,7 +255,7 @@ int main(int argc, char **argv)
     int iterations = 0;
     bool conti = true;
     //while (stop) {
-        for (int i = 0; i < num_nodes; i++) {
+        for (int i = 1; i < num_nodes; i++) {
 
         // Copy the termination variable to the device
 
