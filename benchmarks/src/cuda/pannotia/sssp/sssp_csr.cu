@@ -222,7 +222,7 @@ int main(int argc, char **argv)
     int stop_host = 1;
     int cnt = 0;
     // Main computation loop
-    for (int i = 1; i < num_nodes; i++) {
+    for (int i = 0; i < num_nodes; i++) {
         // Reset the termination variable
 
         // Launch the assignment kernel
