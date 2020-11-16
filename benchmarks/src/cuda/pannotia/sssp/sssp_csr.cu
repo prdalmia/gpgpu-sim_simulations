@@ -234,7 +234,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "ERROR: write stop_d (%s)\n", cudaGetErrorString(err));
             return -1;
         }
-        stop_host = false;
+        stop_host = true;
         for (int j = 0; j < num_nodes; ++j) {
             //const int gpu_stop = (int)aload32((unsigned int *)&g_stop_d[j]);
             const int gpu_stop = stop[j];
@@ -252,8 +252,7 @@ int main(int argc, char **argv)
                                                      vector_d2, stop_d);
 
         // Launch the check kernel
-        vector_diff <<<grid, threads>>>(vector_d1, vector_d2,
-                                        stop_d, num_nodes);
+        //vector_diff <<<grid, threads>>>(vector_d1, vector_d2,stop_d, num_nodes);
 
 
         cnt++;
