@@ -256,14 +256,8 @@ int main(int argc, char **argv)
     bool conti = true;
     //while (stop) {
         for (int i = 0; i < num_nodes; i++) {
-        stop = 0;
 
         // Copy the termination variable to the device
-        err = cudaMemcpy(stop_d, &stop, sizeof(int), cudaMemcpyHostToDevice);
-        if (err != cudaSuccess) {
-            fprintf(stderr, "ERROR: write stop_d variable (%s)\n", cudaGetErrorString(err));
-            return -1;
-        }
 
         // Launch mis1
         mis1 <<<grid, threads>>>(row_d, col_d, node_value_d, s_array_d,
