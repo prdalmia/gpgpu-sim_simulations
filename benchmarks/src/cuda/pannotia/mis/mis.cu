@@ -288,6 +288,7 @@ int main(int argc, char **argv)
          conti = false;
         for (int j = 0; j < num_gpu_threads; j++) {
             if (cont[j]) {
+                printf("No Iter\n");
                 conti = true;
                 break;
             }
@@ -295,6 +296,7 @@ int main(int argc, char **argv)
 
         if (!conti) {
             iterations++;
+            printf("Increasing Iter\n");
             break;
         }
     }
