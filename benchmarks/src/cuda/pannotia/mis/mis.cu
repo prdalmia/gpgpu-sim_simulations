@@ -269,6 +269,27 @@ int main(int argc, char **argv)
         mis1 <<<grid, threads>>>(row_d, col_d, node_value_d, s_array_d,
                                  c_array_d, min_array_d, cont_d, num_nodes,
                                  num_edges);
+          // Copy the termination variable back
+          err = cudaMemcpy(cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
+          if (err != cudaSuccess) {
+              fprintf(stderr, "ERROR: read stop_d variable (%s)\n", cudaGetErrorString(err));
+              return -1;
+          }
+
+        conti = false;
+        for (int j = 0; j < num_gpu_threads; j++) {
+            if (cont[j]) {
+                printf("No Iter\n");
+                conti = true;
+                break;
+            }
+        }
+                         
+        if (!conti) {
+            iterations++;
+            printf("Increasing Iter\n");
+            break;
+        }
 
         // Launch mis2
         mis2 <<<grid, threads>>>(row_d, col_d, node_value_d, s_array_d,
@@ -278,27 +299,9 @@ int main(int argc, char **argv)
         // Launch mis3
         mis3 <<<grid, threads>>>(c_array_u_d, c_array_d, min_array_d, num_nodes);
 
-        // Copy the termination variable back
-        err = cudaMemcpy(cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
-        if (err != cudaSuccess) {
-            fprintf(stderr, "ERROR: read stop_d variable (%s)\n", cudaGetErrorString(err));
-            return -1;
-        }
+      iterations++;
 
-         conti = false;
-        for (int j = 0; j < num_gpu_threads; j++) {
-            if (cont[j]) {
-                printf("No Iter\n");
-                conti = true;
-                break;
-            }
-        }
-
-        if (!conti) {
-            iterations++;
-            printf("Increasing Iter\n");
-            break;
-        }
+     
     }
 
     cudaThreadSynchronize();
