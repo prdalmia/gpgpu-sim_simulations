@@ -229,7 +229,7 @@ int main(int argc, char **argv)
         vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop_d, num_nodes);
         cudaThreadSynchronize();
         // Copy the termination variable to the device
-        err = cudaMemcpy(stop, stop_d, num_nodes*sizeof(int), cudaMemcpyHostToDevice);
+        err = cudaMemcpy(stop, stop_d, num_nodes * sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: write stop_d (%s)\n", cudaGetErrorString(err));
             return -1;
