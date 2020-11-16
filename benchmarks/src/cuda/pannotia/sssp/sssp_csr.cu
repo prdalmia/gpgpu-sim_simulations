@@ -234,7 +234,7 @@ int main(int argc, char **argv)
             fprintf(stderr, "ERROR: write stop_d (%s)\n", cudaGetErrorString(err));
             return -1;
         }
-        stop_host = true;
+        stop_host = false;
         for (int j = 0; j < num_nodes; ++j) {
             //const int gpu_stop = (int)aload32((unsigned int *)&g_stop_d[j]);
             const int gpu_stop = stop[j];
