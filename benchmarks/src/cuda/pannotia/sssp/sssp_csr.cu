@@ -209,7 +209,7 @@ int main(int argc, char **argv)
     int sourceVertex = 0;
 
     // Launch the initialization kernel
-    vector_init <<<grid, threads>>>(vector_d1, vector_d2, sourceVertex, num_nodes);
+   // vector_init <<<grid, threads>>>(vector_d1, vector_d2, sourceVertex, num_nodes);
     cudaThreadSynchronize();
     err = cudaGetLastError();
     if (err != cudaSuccess) {
