@@ -507,6 +507,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
                     : "l"(col_base_addr)                                 // Inputs
                 );
             }
+            */
         }
     }
 
@@ -950,8 +951,10 @@ mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
                     :                                                    // Outputs
                     : "l"(col_base_addr)                                 // Inputs
                 );
+            
             }
-        }
+        */      
+      }
     }
 /*
     if (tx == 0) {
