@@ -104,7 +104,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
     int my_task = tid; 
     int edge = 0;
     bool local_cont = false;
-
+/*
     asm volatile
     (
         ".reg .s32 mINDEPENDENT;\n\t"                          // Register for s_array addr
@@ -118,7 +118,8 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
         :                                                      // Outputs
         : "r"(INDEPENDENT), "r"(NOT_PROCESSED), "r"(INACTIVE)  // Inputs
     );
-/*
+*/
+    /*
     if (tx == 0) {
         __denovo_setAcquireRegion(SPECIAL_REGION);
         __denovo_addAcquireRegion(READ_ONLY_REGION);
@@ -137,7 +138,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
             const int row_end = row[my_task + 1];
 
             const int my_node_value = node_value[my_task];
-
+/*
             asm volatile
             (
                 ".reg .u64 m99;\n\t"                   // Register for c_array addr
@@ -151,16 +152,16 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
                 :                                                  // Outputs
                 : "l"(c_array), "l"(min_array), "r"(my_node_value) // Inputs
             );
-
+*/
             // Navigate the neighbor list and find the min
-            //for (int edge = row_start; edge < row_end; edge++) {
-            //    const int neighbor = col[edge];
+            for (int edge = row_start; edge < row_end; edge++) {
+                const int neighbor = col[edge];
 
-            //    if (c_array[neighbor] == NOT_PROCESSED) {
-            //        atomicMin(&min_array[neighbor], my_node_value);
-            //    }
-            //}
-
+              if (c_array[neighbor] == NOT_PROCESSED) {
+                    atomicMin(&min_array[neighbor], my_node_value);
+                }
+            }
+/*
             for (edge = row_start; edge <= (row_end - 8); edge += 8) {
                 int * const col_base_addr = &col[edge];
 
@@ -509,7 +510,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
         }
     }
 
-    cont[tid] = local_cont;
+    
     /*
     if (tx == 0) {
         __denovo_gpuEpilogue(SPECIAL_REGION);
@@ -518,6 +519,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
         __denovo_gpuEpilogue(rel_reg);
     }
     */
+    cont[tid] = local_cont;
 }
 
 
@@ -540,7 +542,7 @@ mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
     const int tx = threadIdx.x;
     int tid = blockDim.x * blockIdx.x + threadIdx.x;
     int edge = 0;
-
+/*
     asm volatile
     (
         ".reg .s32 mINDEPENDENT;\n\t"                          // Register for s_array addr
@@ -554,6 +556,7 @@ mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
         :                                                      // Outputs
         : "r"(INDEPENDENT), "r"(NOT_PROCESSED), "r"(INACTIVE)  // Inputs
     );
+    */
 /*
     if (tx == 0) {
         __denovo_setAcquireRegion(SPECIAL_REGION);
@@ -579,7 +582,7 @@ mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
             //cu_array[tid] = INACTIVE;
 
             atomicOr(&cu_array[tid], INACTIVE);
-
+/*
             asm volatile
             (
                 ".reg .u64 m99;\n\t"                   // Register for c_array addr
@@ -591,18 +594,18 @@ mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
                 :                                      // Outputs
                 : "l"(c_array), "l"(cu_array)          // Inputs
             );
-            
-            // // Mark all the neighbors inactive
-            // for (int edge = row_start; edge < row_end; edge++) {
-            //     const int neighbor = col[edge];
+         */   
+             // Mark all the neighbors inactive
+             for (int edge = row_start; edge < row_end; edge++) {
+                 const int neighbor = col[edge];
 
-            //     if (c_array[neighbor] == NOT_PROCESSED) {
-            //         //use status update array to avoid race
-            //         //cu_array[neighbor] = INACTIVE;
-            //         atomicOr(&cu_array[neighbor], INACTIVE);
-            //     }
-            // }
-
+                 if (c_array[neighbor] == NOT_PROCESSED) {
+                     //use status update array to avoid race
+                     //cu_array[neighbor] = INACTIVE;
+                     atomicOr(&cu_array[neighbor], INACTIVE);
+                 }
+             }
+/*
             for (edge = row_start; edge <= (row_end - 8); edge += 8) {
                 int * const col_base_addr = &col[edge];
 

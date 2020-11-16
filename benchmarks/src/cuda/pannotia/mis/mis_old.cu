@@ -63,7 +63,7 @@
 #include <algorithm>
 #include "../graph_parser/parse.h"
 #include "../graph_parser/util.h"
-#include "kernel.cu"
+#include "kernel_orig.cu"
 
 #ifdef GEM5_FUSION
 #include <stdint.h>
@@ -113,10 +113,11 @@ int main(int argc, char **argv)
         csr = parseMetis(tmpchar, &num_nodes, &num_edges, directed);
     } else if (file_format == 0) {
         csr = parseCOO(tmpchar, &num_nodes, &num_edges, directed);
-    } else if (file_format == 2){ 
-        // Matrix market
-       csr = parseMM(tmpchar, &num_nodes, &num_edges, directed, 0);
-    }else {
+    } 
+    else if (file_format == 2){ 
+    // Matrix market
+   csr = parseMM(tmpchar, &num_nodes, &num_edges, directed, 0);
+}else {
         fprintf(stderr, "reserve for future");
         exit(1);
     }
@@ -257,7 +258,7 @@ int main(int argc, char **argv)
                                  num_edges);
 
         // Launch mis3
-        mis3 <<<grid, threads>>>(c_array_u_d, c_array_d, min_array_d, num_nodes);
+        mis3 <<<grid, threads>>>(c_array_u_d, c_array_d, num_nodes);
 
         // Copy the termination variable back
         err = cudaMemcpy(&stop, stop_d, sizeof(int), cudaMemcpyDeviceToHost);
