@@ -96,7 +96,7 @@ init(int *s_array, int *c_array, int *cu_array, int num_nodes, int num_edges)
 */
 __global__ void
 mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
-     int *min_array, bool *cont, int num_gpu_nodes, int num_edges
+     int *min_array, int *cont, int num_gpu_nodes, int num_edges
 )
 {
     const int tx = threadIdx.x;
@@ -536,8 +536,7 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
  * @param num_nodes    number of vertices
  * @param num_edges    number of edges
  */
-__global__ void
-mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
+__global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_array,
      int *cu_array, int *min_array, int num_gpu_nodes, int num_edges)
 {
     const int tx = threadIdx.x;
