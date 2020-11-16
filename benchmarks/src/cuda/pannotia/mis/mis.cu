@@ -279,7 +279,6 @@ int main(int argc, char **argv)
         conti = false;
         for (int j = 0; j < num_gpu_threads; j++) {
             if (cont[j]) {
-                printf("No Iter\n");
                 conti = true;
                 break;
             }
