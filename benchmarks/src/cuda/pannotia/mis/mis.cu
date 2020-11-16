@@ -264,6 +264,7 @@ int main(int argc, char **argv)
                                  c_array_d, min_array_d, cont_d, num_nodes,
                                  num_edges);
           // Copy the termination variable back
+          cudaThreadSynchronize();
           err = cudaMemcpy(cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
           if (err != cudaSuccess) {
               fprintf(stderr, "ERROR: read stop_d variable (%s)\n", cudaGetErrorString(err));
