@@ -111,11 +111,13 @@ int main(int argc, char **argv)
 
     // Allocate the cost array
     int *cost_array = (int *)malloc(num_nodes * sizeof(int));
+    int *stop = (int *)malloc(num_nodes * sizeof(int));
     if (!cost_array) fprintf(stderr, "malloc failed cost_array\n");
 
     // Set the cost array to zero
     for (int i = 0; i < num_nodes; i++) {
         cost_array[i] = 0;
+        stop[i] = 0;
     }
 
     // Create device-side buffers
@@ -143,12 +145,13 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    // Termination variable
-    err = cudaMalloc(&stop_d, sizeof(int));
-    if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMalloc stop_d (size:%d) => %s\n", 1, cudaGetErrorString(err));
-        return -1;
-    }
+
+     // Create the device-side graph structure
+     err = cudaMalloc(&stop_d, (num_nodes) * sizeof(int));
+     if (err != cudaSuccess) {
+         fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+         return -1;
+     }
 
     // Create the device-side buffers for sssp
     err = cudaMalloc(&vector_d1, num_nodes * sizeof(int));
@@ -187,6 +190,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
+    err = cudaMemcpy(stop_d, stop, num_nodes * sizeof(int), cudaMemcpyHostToDevice);
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMemcpy stop (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        return -1;
+    }
+
     double timer3 = gettime();
 
     // Work dimensions
@@ -210,22 +219,32 @@ int main(int argc, char **argv)
 
     //int *  stop = (int *)malloc(num_nodes * sizeof(int) );
     
-    int stop = 1;
+    int stop_host = 1;
     int cnt = 0;
     // Main computation loop
     for (int i = 1; i < num_nodes; i++) {
         // Reset the termination variable
-        stop = 0;
 
+        // Launch the assignment kernel
+        vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop_d, num_nodes);
+        cudaThreadSynchronize();
         // Copy the termination variable to the device
-        err = cudaMemcpy(stop_d, &stop, sizeof(int), cudaMemcpyHostToDevice);
+        err = cudaMemcpy(stop, stop_d, num_nodes*sizeof(int), cudaMemcpyHostToDevice);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: write stop_d (%s)\n", cudaGetErrorString(err));
             return -1;
         }
+        stop_host = true;
+        for (int j = 0; j < num_nodes; ++j) {
+            //const int gpu_stop = (int)aload32((unsigned int *)&g_stop_d[j]);
+            const int gpu_stop = stop[j];
+            stop_host = stop_host && gpu_stop;
+        }
+        if (stop_host) {
+            break;
+        }
 
-        // Launch the assignment kernel
-        vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop_d, num_nodes);
+        
 
         // Launch the min.+ kernel
         spmv_min_dot_plus_kernel <<<grid, threads>>>(num_nodes, row_d, col_d,
@@ -236,17 +255,7 @@ int main(int argc, char **argv)
         vector_diff <<<grid, threads>>>(vector_d1, vector_d2,
                                         stop_d, num_nodes);
 
-        // Read the termination variable back
-        err = cudaMemcpy(&stop, stop_d, sizeof(int), cudaMemcpyDeviceToHost);
-        if (err != cudaSuccess) {
-            fprintf(stderr, "ERROR: read stop_d (%s)\n", cudaGetErrorString(err));
-            return -1;
-        }
 
-        // Exit the loop
-        if (stop == 0) {
-            break;
-        }
         cnt++;
     }
     cudaThreadSynchronize();
