@@ -279,7 +279,7 @@ int main(int argc, char **argv)
         mis3 <<<grid, threads>>>(c_array_u_d, c_array_d, min_array_d, num_nodes);
 
         // Copy the termination variable back
-        err = cudaMemcpy(&cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
+        err = cudaMemcpy(cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: read stop_d variable (%s)\n", cudaGetErrorString(err));
             return -1;
