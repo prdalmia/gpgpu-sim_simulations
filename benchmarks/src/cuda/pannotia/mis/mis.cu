@@ -120,9 +120,16 @@ int main(int argc, char **argv)
         fprintf(stderr, "reserve for future");
         exit(1);
     }
+ // Work dimensions
+ int block_size = 128;
+ int num_blocks = (num_nodes + block_size - 1) / block_size;
 
+ dim3 threads(block_size,  1, 1);
+ dim3 grid(num_blocks, 1, 1);
+ const int num_gpu_threads = grid.x * threads.x;
     // Allocate the node value array
     int *node_value = (int *)malloc(num_nodes * sizeof(int));
+    int *cont = (int *)malloc(num_gpu_threads * sizeof(int));
     if (!node_value) fprintf(stderr, "malloc failed node_value\n");
 
     // Allocate the set array
@@ -134,6 +141,10 @@ int main(int argc, char **argv)
         node_value[i] =  rand() % RANGE;
     }
 
+
+    for (int i = 0; i < num_gpu_threads; i++) {
+        cont[i] = false;
+    }
     // Create device side buffers
     int *row_d;
     int *col_d;
@@ -144,8 +155,14 @@ int main(int argc, char **argv)
     int *node_value_d;
     int *min_array_d;
     int *stop_d;
+    int *cont_d;
 
     // Allocate the device-side buffers for the graph
+    err = cudaMalloc(&cont_d, num_gpu_threads * sizeof(int));
+    if (err != cudaSuccess) {
+        fprintf(stderr, "ERROR: cudaMalloc cont_d (size:%d) => %s\n",  num_nodes , cudaGetErrorString(err));
+        return -1;
+    }
     err = cudaMalloc(&row_d, num_nodes * sizeof(int));
     if (err != cudaSuccess) {
         fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n",  num_nodes , cudaGetErrorString(err));
@@ -198,9 +215,9 @@ int main(int argc, char **argv)
 #endif
 
     // Copy data to device-side buffers
-    err = cudaMemcpy(row_d, csr->row_array, num_nodes * sizeof(int), cudaMemcpyHostToDevice);
+    err = cudaMemcpy(cont_d, cont, num_gpu_threads * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMemcpy row_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMemcpy cont_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
         return -1;
     }
 
@@ -216,12 +233,12 @@ int main(int argc, char **argv)
         return -1;
     }
 
-    // Work dimensions
-    int block_size = 128;
-    int num_blocks = (num_nodes + block_size - 1) / block_size;
-
-    dim3 threads(block_size,  1, 1);
-    dim3 grid(num_blocks, 1, 1);
+   // Copy data to device-side buffers
+   err = cudaMemcpy(cont_d, cont, num_gpu_threads * sizeof(int), cudaMemcpyHostToDevice);
+   if (err != cudaSuccess) {
+       fprintf(stderr, "ERROR: cudaMemcpy row_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+       return -1;
+   }
 
     // Launch the initialization kernel
     init <<<grid, threads>>>(s_array_d, c_array_d, c_array_u_d,
@@ -236,7 +253,9 @@ int main(int argc, char **argv)
     // Termination variable
     int stop = 1;
     int iterations = 0;
-    while (stop) {
+    bool conti = true;
+    //while (stop) {
+        for (int i = 0; i < num_nodes; i++) {
         stop = 0;
 
         // Copy the termination variable to the device
@@ -248,7 +267,7 @@ int main(int argc, char **argv)
 
         // Launch mis1
         mis1 <<<grid, threads>>>(row_d, col_d, node_value_d, s_array_d,
-                                 c_array_d, min_array_d, stop_d, num_nodes,
+                                 c_array_d, min_array_d, cont_d, num_nodes,
                                  num_edges);
 
         // Launch mis2
@@ -260,14 +279,24 @@ int main(int argc, char **argv)
         mis3 <<<grid, threads>>>(c_array_u_d, c_array_d, min_array_d, num_nodes);
 
         // Copy the termination variable back
-        err = cudaMemcpy(&stop, stop_d, sizeof(int), cudaMemcpyDeviceToHost);
+        err = cudaMemcpy(&cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
             fprintf(stderr, "ERROR: read stop_d variable (%s)\n", cudaGetErrorString(err));
             return -1;
         }
 
-        iterations++;
+         conti = false;
+        for (int j = 0; j < num_gpu_threads; j++) {
+            if (cont[j]) {
+                conti = true;
+                break;
+            }
+        }
 
+        if (!conti) {
+            iterations++;
+            break;
+        }
     }
 
     cudaThreadSynchronize();
