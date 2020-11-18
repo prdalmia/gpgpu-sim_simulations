@@ -473,7 +473,7 @@ vector_diff(int *vector1, int *vector2, int *stop, const int num_nodes)
 
     if (tid < num_nodes) {
         if (vector2[tid] != vector1[tid]) {
-            *stop[tid] = 1;
+            stop[tid] = 1;
         }
     }
 }
