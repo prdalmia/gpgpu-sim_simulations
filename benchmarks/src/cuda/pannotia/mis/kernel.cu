@@ -581,7 +581,7 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
             // Set the status to inactive
             //cu_array[tid] = INACTIVE;
 
-            atomicOr(&cu_array[tid], INACTIVE);
+            atomicExch(&cu_array[tid], INACTIVE);
 /*
             asm volatile
             (
@@ -602,7 +602,7 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
                  if (c_array[neighbor] == NOT_PROCESSED) {
                      //use status update array to avoid race
                      //cu_array[neighbor] = INACTIVE;
-                     atomicOr(&cu_array[neighbor], INACTIVE);
+                     atomicExch(&cu_array[neighbor], INACTIVE);
                  }
              }
 /*
@@ -992,7 +992,7 @@ mis3(int *cu_array, int *c_array, int *min_array, int num_gpu_nodes)
         if (status == INACTIVE) {
             c_array[tid] = status;
         } else {
-            atomicOr(&min_array[tid], INT_MAX);
+            atomicExch(&min_array[tid], INT_MAX);
         }
     }
 /*
