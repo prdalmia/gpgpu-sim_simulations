@@ -252,7 +252,7 @@ int main(int argc, char **argv)
                                                      vector_d2, stop_d);
 
         // Launch the check kernel
-        //vector_diff <<<grid, threads>>>(vector_d1, vector_d2,stop_d, num_nodes);
+        vector_diff <<<grid, threads>>>(vector_d1, vector_d2,stop_d, num_nodes);
 
 
         cnt++;
