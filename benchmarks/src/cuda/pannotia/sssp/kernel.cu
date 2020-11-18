@@ -473,7 +473,7 @@ vector_diff(int *vector1, int *vector2, int *stop, const int num_nodes)
 
     if (tid < num_nodes) {
         if (vector2[tid] != vector1[tid]) {
-            *stop = 1;
+            *stop[tid] = 1;
         }
     }
 }
@@ -486,7 +486,7 @@ vector_init(int *vector1, int *vector2, const int i, const int num_nodes)
     if (tid < num_nodes) {
         if (tid == i) {
             // If it is the source vertex
-            vector1[tid] = 0;
+            vector1[tid] = BIG_NUM;
             vector2[tid] = 0;
         } else {
             // If it a non-source vertex

@@ -149,7 +149,7 @@ int main(int argc, char **argv)
      // Create the device-side graph structure
      err = cudaMalloc(&stop_d, (num_nodes) * sizeof(int));
      if (err != cudaSuccess) {
-         fprintf(stderr, "ERROR: cudaMalloc row_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+         fprintf(stderr, "ERROR: cudaMalloc stop_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
          return -1;
      }
 
@@ -222,7 +222,7 @@ int main(int argc, char **argv)
     int stop_host = 1;
     int cnt = 0;
     // Main computation loop
-    for (int i = 0; i < num_nodes; i++) {
+    for (int i = 1; i < num_nodes; i++) {
         // Reset the termination variable
 
         // Launch the assignment kernel
