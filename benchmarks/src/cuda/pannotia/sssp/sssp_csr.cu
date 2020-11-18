@@ -227,7 +227,7 @@ int main(int argc, char **argv)
 
         // Launch the assignment kernel
         vector_assign <<<grid, threads>>>(vector_d1, vector_d2, stop_d, num_nodes);
-        cudaThreadSynchronize();
+        //cudaThreadSynchronize();
         // Copy the termination variable to the device
         err = cudaMemcpy(stop, stop_d, num_nodes * sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
