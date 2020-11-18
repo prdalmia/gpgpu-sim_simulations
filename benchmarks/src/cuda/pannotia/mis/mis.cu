@@ -214,10 +214,10 @@ int main(int argc, char **argv)
     m5_work_begin(0, 0);
 #endif
 
-    // Copy data to device-side buffers
-    err = cudaMemcpy(cont_d, cont, num_gpu_threads * sizeof(int), cudaMemcpyHostToDevice);
+  
+    err = cudaMemcpy(row_d, csr->row_array, num_nodes * sizeof(int), cudaMemcpyHostToDevice);
     if (err != cudaSuccess) {
-        fprintf(stderr, "ERROR: cudaMemcpy cont_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
+        fprintf(stderr, "ERROR: cudaMemcpy row_d (size:%d) => %s\n", num_nodes, cudaGetErrorString(err));
         return -1;
     }
 
