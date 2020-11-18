@@ -268,11 +268,6 @@ int main(int argc, char **argv)
         stop = 0;
 
         // Copy the termination variable to the device
-        err = cudaMemcpy(stop_d, &stop, sizeof(int), cudaMemcpyHostToDevice);
-        if (err != cudaSuccess) {
-            fprintf(stderr, "ERROR: write stop_d: %s\n", cudaGetErrorString(err));
-        }
-
         // Launch the color kernel 1
         color1_pusho <<< grid, threads >>>(row_d, col_d, node_value_d, col_cnt_d, color_d,
                                      cont_d, max_d, graph_color, num_nodes,
@@ -284,7 +279,7 @@ int main(int argc, char **argv)
 
         err = cudaMemcpy(cont, cont_d, num_gpu_threads * sizeof(int), cudaMemcpyDeviceToHost);
         if (err != cudaSuccess) {
-            fprintf(stderr, "ERROR: read stop_d: %s\n", cudaGetErrorString(err));
+            fprintf(stderr, "ERROR: read cont_d: %s\n", cudaGetErrorString(err));
         }
 
         conti = false;
