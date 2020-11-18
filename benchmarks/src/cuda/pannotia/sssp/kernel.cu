@@ -86,9 +86,9 @@ spmv_min_dot_plus_kernel(int num_nodes,
                               __denovo_addAcquireRegion(default_reg);
                               __denovo_addAcquireRegion(rel_reg);
                             }
-                            */
+                            
                             __syncthreads();
-                        
+                        */
                             for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
                               //const int should_stop = (int)atomicXor(&stop[tid], 0);
                               const int should_stop = stop[tid];
