@@ -420,9 +420,10 @@ spmv_min_dot_plus_kernel(int num_nodes,
                             __denovo_addAcquireRegion(default_reg);
                             __denovo_addAcquireRegion(rel_reg);
                           }
-                         */
+                         
                           __syncthreads();
-                        //AskMatt
+                        */
+                          //AskMatt
                           for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
                             const int x_val = x[tid];
                             const int y_val = (int)atomicAdd(&y[tid], 0);
