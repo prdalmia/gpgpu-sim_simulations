@@ -486,7 +486,7 @@ vector_init(int *vector1, int *vector2, const int i, const int num_nodes)
     if (tid < num_nodes) {
         if (tid == i) {
             // If it is the source vertex
-            vector1[tid] = BIG_NUM;
+            vector1[tid] = 0;
             vector2[tid] = 0;
         } else {
             // If it a non-source vertex
