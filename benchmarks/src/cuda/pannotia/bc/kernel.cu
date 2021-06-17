@@ -96,9 +96,13 @@ bfs_kernel(int *row, int *col, int *d, float *rho, int *cont,
                 d[w] = dist + 1;
             }
             //transfer the rho value to the neighbor
+ 
             if (d[w] == (dist + 1)) {
+                #ifdef SYNC   
                 atomicAdd(&rho[w], atomicAdd(&rho[tid], 0.0f));
+                #endif
             }
+            
         }
     }
 }
@@ -141,13 +145,18 @@ backtrack_kernel(int *row, int *col, int *d, float *rho, float *sigma,
         for (int edge = start; edge < end; edge++) {
             int w = col[edge];
             // Update the sigma value traversing back
-            if (d[w] == dist - 2)
+            if (d[w] == dist - 2){
+            #ifdef SYNC             
                 atomicAdd(&sigma[w], atomicAdd(&rho[w], 0.0f) / atomicAdd(&rho[tid], 0.0f) * (1 + atomicAdd(&sigma[tid], 0.0f)));
+            #endif    
+            }
         }
 
         // Update the BC value
         if (tid != s)
+        #ifdef SYNC 
             bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
+        #endif   
     }
 
 }
@@ -171,7 +180,9 @@ back_sum_kernel(const int s, const int dist, int *d, float *sigma, float *bc,
     if (tid < num_nodes) {
         // If it is not the source
         if (s != tid && d[tid] == dist - 1) {
+            #ifdef SYNC 
             bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
+            #endif
         }
     }
 }
@@ -191,16 +202,20 @@ clean_1d_array(const int source, int *dist_array, float *sigma, float *rho,
     int tid = blockIdx.x * blockDim.x + threadIdx.x;
 
     if (tid < num_nodes) {
-
+        #ifdef SYNC 
         atomicExch(&sigma[tid] , 0.0f);
-
+        #endif
         if (tid == source) {
             // If source vertex rho = 1, dist = 0
+            #ifdef SYNC 
             atomicExch(&sigma[tid] , 1.0f);
+            #endif
             dist_array[tid] = 0;
         } else {
             // If other vertices rho = 0, dist = -1
+            #ifdef SYNC 
             atomicExch(&sigma[tid] , 0.0f);
+            #endif
             dist_array[tid] = -1;
         }
     }
