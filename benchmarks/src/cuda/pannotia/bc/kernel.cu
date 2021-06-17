@@ -153,10 +153,11 @@ backtrack_kernel(int *row, int *col, int *d, float *rho, float *sigma,
         }
 
         // Update the BC value
-        if (tid != s)
+        if (tid != s){
         #ifdef SYNC 
             bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
         #endif   
+        }
     }
 
 }
