@@ -658,7 +658,9 @@
                  // Determine if the vertex value is the maximum in the neighborhood
                  if (color_array[nid] == -1 && neigh_out_deg > 1) {
                      cont_tid = true;
+                     #ifdef SYNC
                      atomicMax(&max_d[nid], this_node_val);
+                     #endif
                  }
              }
          }
@@ -695,13 +697,18 @@ __global__ void color2_push(int *node_value, int *color_array, int *max_d,
     for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
         // If the vertex is still not colored
         if (color_array[tid] == -1) {
+            #ifdef SYNC
             const int max_tid = atomicAdd(&max_d[tid], 0);
-
+            #else
+            const int max_tid = max_d[tid];
+            #endif
             if (node_value[tid] >= max_tid) {
                 // Assign a color
                 color_array[tid] = color;
             } else {
+                #ifdef SYNC 
                 atomicExch(&max_d[tid], -1);
+                #endif
             }
         }
     }
