@@ -106,8 +106,9 @@ spmv_min_dot_plus_kernel(int num_nodes,
                         
                                   int * const y_col_addr = &y[col_i];
                                   const int new_val = data_i + min;
-                        
+                                  #ifdef SYNC
                                   atomicMin(y_col_addr, new_val);
+                                  #endif
                                 }
                         /*
                                 asm volatile
@@ -426,7 +427,11 @@ spmv_min_dot_plus_kernel(int num_nodes,
                           //AskMatt
                           for (; tid < num_nodes; tid += blockDim.x * gridDim.x) {
                             const int x_val = x[tid];
+                            #ifdef SYNC
                             const int y_val = (int)atomicAdd(&y[tid], 0);
+                            #else
+                            const int y_val = (int)y[tid];
+                            #endif
                             //const int y_val = (int)atomicXor(&y[tid], 0);
                             const bool changed = x_val != y_val;
                         

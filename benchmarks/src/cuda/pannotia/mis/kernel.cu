@@ -158,7 +158,9 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
                 const int neighbor = col[edge];
 
               if (c_array[neighbor] == NOT_PROCESSED) {
+                  #ifdef SYNC
                     atomicMin(&min_array[neighbor], my_node_value);
+                    #endif
                 }
             }
 /*
@@ -580,9 +582,10 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
 
             // Set the status to inactive
             //cu_array[tid] = INACTIVE;
-
+            #ifdef SYNC
             atomicExch(&cu_array[tid], INACTIVE);
-/*
+            #endif
+            /* 
             asm volatile
             (
                 ".reg .u64 m99;\n\t"                   // Register for c_array addr
@@ -602,7 +605,9 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
                  if (c_array[neighbor] == NOT_PROCESSED) {
                      //use status update array to avoid race
                      //cu_array[neighbor] = INACTIVE;
+                     #ifdef SYNC
                      atomicExch(&cu_array[neighbor], INACTIVE);
+                     #endif
                  }
              }
 /*
@@ -988,11 +993,17 @@ mis3(int *cu_array, int *c_array, int *min_array, int num_gpu_nodes)
 */
     for (; tid < num_gpu_nodes; tid += blockDim.x * gridDim.x) {
         //set the status array
+        #ifdef SYNC
         const int status = atomicAdd(&cu_array[tid], 0);
+        #else
+        const int status = cu_array[tid];
+        #endif
         if (status == INACTIVE) {
             c_array[tid] = status;
         } else {
+            #ifdef SYNC
             atomicExch(&min_array[tid], INT_MAX);
+            #endif
         }
     }
 /*
