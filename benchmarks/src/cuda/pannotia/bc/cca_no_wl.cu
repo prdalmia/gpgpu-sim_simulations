@@ -94,7 +94,11 @@ void init(int nodes,
             m = min(m, nlist[i]);
             i++;
         }
+        #ifdef SYNC
         atomicExch(&nstat[v], m);
+        #else
+        nstat[v] = m;
+        #endif
     }
 }
 
@@ -104,11 +108,23 @@ void init(int nodes,
  */
 static inline __device__ int representative(const int idx, int* const __restrict__ nstat)
 {
+    #ifdef SYNC
     int curr = atomicAdd(&nstat[idx], 0);
+    #else
+    int curr = nstat[idx];
+    #endif
     if (curr != idx) {
         int next, prev = idx;
+        #ifdef SYNC
         while (curr > (next = atomicAdd(&nstat[curr], 0))) {
+        #else
+        while (curr > (next = nstat[curr])) {
+        #endif    
+            #ifdef SYNC
             atomicExch(&nstat[prev], next); //atomicExch is an atomicStore
+            #else
+            nstat[prev] =  next;
+            #endif
             prev = curr;
             curr = next;
         }
@@ -134,7 +150,11 @@ void compute1(int nodes,
     const int incr = gridDim.x * blockDim.x;
 
     for (int v = from; v < nodes; v += incr) {
+        #ifdef SYNC
         const int vstat = atomicAdd(&nstat[v], 0);
+        #else
+        const int vstat = nstat[v];
+        #endif
         if (v != vstat) {
             const int beg = nidx[v];
             const int end = nidx[v + 1];
@@ -149,12 +169,20 @@ void compute1(int nodes,
                         if (vstat != ostat) {
                             int ret;
                             if (vstat < ostat) {
+                                #ifdef SYNC
                                 if ((ret = atomicMin(&nstat[ostat], vstat)) != ostat) {
+                                #else
+                                if ((ret = ((nstat[ostat] < vstat) ? nstat[ostat] : vstat)) != ostat)
+                                #endif    
                                     ostat = ret;
                                     repeat = true;
                                 }
                             } else {
+                                #ifdef SYNC
                                 if ((ret = atomicMin(&nstat[vstat], ostat)) != vstat) {
+                                #else
+                                if ((ret = ((nstat[vstat] < ostat) ? nstat[vstat] : ostat)) != vstat)
+                                #endif    
                                     vstat = ret;
                                     repeat = true;
                                 }
@@ -184,12 +212,24 @@ void flatten(int nodes,
 
     for (int v = from; v < nodes; v += incr) {
         int next, vstat;
-        vstat=atomicAdd(&nstat[v], 0);
+        #ifdef SYNC
+        vstat = atomicAdd(&nstat[v], 0);
+        #else
+        vstat = nstat[v];
+        #endif
         const int old = vstat;
+        #ifdef SYNC
         while (vstat > (next = atomicAdd(&nstat[vstat], 0))) {
+        #else
+        while (vstat > (next = nstat[vstat])) {
+        #endif    
             vstat = next;
         }
+        #ifdef SYNC
         if (old != vstat) { atomicExch(&nstat[v], vstat); }
+        #else
+        if (old != vstat) { nstat[v] = vstat; }
+        #endif
     }
 }
 
