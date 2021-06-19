@@ -181,7 +181,7 @@ void compute1(int nodes,
                                 #ifdef SYNC
                                 if ((ret = atomicMin(&nstat[vstat], ostat)) != vstat) {
                                 #else
-                                if ((ret = ((nstat[vstat] < ostat) ? nstat[vstat] : ostat)) != vstat)
+                                if ((ret = ((nstat[vstat] < ostat) ? nstat[vstat] : ostat)) != vstat){
                                 #endif    
                                     vstat = ret;
                                     repeat = true;
@@ -211,7 +211,7 @@ void flatten(int nodes,
     const int incr = gridDim.x * blockDim.x;
 
     for (int v = from; v < nodes; v += incr) {
-        int next, vstat;
+        int next, vstat; 
         #ifdef SYNC
         vstat = atomicAdd(&nstat[v], 0);
         #else
