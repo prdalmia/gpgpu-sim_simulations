@@ -659,7 +659,7 @@
                  if (color_array[nid] == -1 && neigh_out_deg > 1) {
                      cont_tid = true;
                      #ifdef SYNC
-                     atomicMax(&max_d[nid], this_node_val)
+                     atomicMax(&max_d[nid], this_node_val);
                      #else
                      max_d[nid] = (max_d[nid] > this_node_val) ? max_d[nid] : this_node_val ;
                      #endif
