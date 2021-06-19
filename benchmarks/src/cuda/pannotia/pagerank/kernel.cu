@@ -87,7 +87,11 @@ pagerank1(int *row, int *col, int *data, float *page_rank1, float *page_rank2,
         for (int edge = start; edge < end; edge++) {
             nid = col[edge];
             // Transfer the PageRank value to neighbors
+            #ifdef SYNC
             atomicAdd(&page_rank2[nid], atomicAdd(&page_rank1[tid], 0.0f) / (float)(end - start));
+            #else
+            page_rank2[nid] = page_rank1[tid]/((float)(end - start));
+            #endif
         }
     }
 }
@@ -112,9 +116,18 @@ pagerank2(int *row, int *col, int *data, float *page_rank1, float *page_rank2,
     // Update pagerank value with the damping factor
     if (tid < num_nodes) {
        // page_rank1[tid]	= 0.15 / (float)num_nodes + 0.85 * page_rank2[tid];
+       #ifdef SYNC
         atomicExch(&page_rank1[tid], 0.15 / (float)num_nodes + 0.85 * atomicAdd(&page_rank2[tid], 0.0f));
+        #else
+        page_rank1[tid]	= 0.15 / (float)num_nodes + 0.85 * page_rank2[tid];
+        #endif
        // page_rank2[tid] = 0.0f;
+       #ifdef SYNC
         atomicExch(&page_rank2[tid] , 0.0f);
+        #else
+        page_rank2[tid] = 0.0f;
+        #endif
+
     }
 }
 

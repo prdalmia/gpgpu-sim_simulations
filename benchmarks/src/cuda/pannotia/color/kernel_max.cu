@@ -659,7 +659,9 @@
                  if (color_array[nid] == -1 && neigh_out_deg > 1) {
                      cont_tid = true;
                      #ifdef SYNC
-                     atomicMax(&max_d[nid], this_node_val);
+                     atomicMax(&max_d[nid], this_node_val)
+                     #else
+                     max_d[nid] = (max_d[nid] > this_node_val) ? max_d[nid] : this_node_val ;
                      #endif
                  }
              }
@@ -708,7 +710,10 @@ __global__ void color2_push(int *node_value, int *color_array, int *max_d,
             } else {
                 #ifdef SYNC 
                 atomicExch(&max_d[tid], -1);
+                #else
+                max_d[tid] = -1;
                 #endif
+
             }
         }
     }

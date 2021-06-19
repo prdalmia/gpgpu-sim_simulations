@@ -108,6 +108,8 @@ spmv_min_dot_plus_kernel(int num_nodes,
                                   const int new_val = data_i + min;
                                   #ifdef SYNC
                                   atomicMin(y_col_addr, new_val);
+                                  #else
+                                  *y_col_addr = (*y_col_addr < new_val) ? *y_col_addr : new_val ;
                                   #endif
                                 }
                         /*

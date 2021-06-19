@@ -160,6 +160,8 @@ mis1(int *row, int *col, int *node_value, int *s_array, int *c_array,
               if (c_array[neighbor] == NOT_PROCESSED) {
                   #ifdef SYNC
                     atomicMin(&min_array[neighbor], my_node_value);
+                    #else
+                    min_array[neighbor] = (min_array[neighbor] > my_node_value) ? my_node_value : min_array[neighbor];
                     #endif
                 }
             }
@@ -569,8 +571,11 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
     __syncthreads();
 */
     for (; tid < num_gpu_nodes; tid += blockDim.x * gridDim.x) {
+        #ifdef SYNC
         const int my_min_value = atomicAdd(&min_array[tid], 0);
-
+        #else
+        const int my_min_value = min_array[tid];
+        #endif
         if (node_value[tid] <= my_min_value && c_array[tid] == NOT_PROCESSED) {
             // -1: Not processed -2: Inactive 2: Independent set
             // Put the item into the independent set
@@ -584,6 +589,8 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
             //cu_array[tid] = INACTIVE;
             #ifdef SYNC
             atomicExch(&cu_array[tid], INACTIVE);
+            #else
+            cu_array[tid] = INACTIVE;
             #endif
             /* 
             asm volatile
@@ -607,6 +614,8 @@ __global__ void mis2(int *row, int *col, int *node_value, int *s_array, int *c_a
                      //cu_array[neighbor] = INACTIVE;
                      #ifdef SYNC
                      atomicExch(&cu_array[neighbor], INACTIVE);
+                     #else
+                     cu_array[neighbor] = INACTIVE;
                      #endif
                  }
              }
@@ -1003,6 +1012,8 @@ mis3(int *cu_array, int *c_array, int *min_array, int num_gpu_nodes)
         } else {
             #ifdef SYNC
             atomicExch(&min_array[tid], INT_MAX);
+            #else
+            min_array[tid] = INT_MAX;
             #endif
         }
     }

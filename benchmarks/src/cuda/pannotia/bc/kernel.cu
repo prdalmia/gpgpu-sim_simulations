@@ -100,6 +100,8 @@ bfs_kernel(int *row, int *col, int *d, float *rho, int *cont,
             if (d[w] == (dist + 1)) {
                 #ifdef SYNC   
                 atomicAdd(&rho[w], atomicAdd(&rho[tid], 0.0f));
+                #else
+                rho[w] = rho[w] + rho[tid];
                 #endif
             }
             
@@ -148,6 +150,8 @@ backtrack_kernel(int *row, int *col, int *d, float *rho, float *sigma,
             if (d[w] == dist - 2){
             #ifdef SYNC             
                 atomicAdd(&sigma[w], atomicAdd(&rho[w], 0.0f) / atomicAdd(&rho[tid], 0.0f) * (1 + atomicAdd(&sigma[tid], 0.0f)));
+            #else
+            sigma[w] = (rho[w] / rho[tid]) * (1 + sigma[tid]);
             #endif    
             }
         }
@@ -156,6 +160,8 @@ backtrack_kernel(int *row, int *col, int *d, float *rho, float *sigma,
         if (tid != s){
         #ifdef SYNC 
             bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
+        #else
+            bc[tid] = bc[tid] + sigma[tid];    
         #endif   
         }
     }
@@ -183,6 +189,8 @@ back_sum_kernel(const int s, const int dist, int *d, float *sigma, float *bc,
         if (s != tid && d[tid] == dist - 1) {
             #ifdef SYNC 
             bc[tid] = bc[tid] + atomicAdd(&sigma[tid], 0.0f);
+            #else
+            bc[tid] = bc[tid] + sigma[tid];
             #endif
         }
     }
@@ -205,17 +213,23 @@ clean_1d_array(const int source, int *dist_array, float *sigma, float *rho,
     if (tid < num_nodes) {
         #ifdef SYNC 
         atomicExch(&sigma[tid] , 0.0f);
+        #else
+        sigma[tid] = 0.0f;
         #endif
         if (tid == source) {
             // If source vertex rho = 1, dist = 0
             #ifdef SYNC 
             atomicExch(&sigma[tid] , 1.0f);
+            #else
+            sigma[tid] =  1.0f;
             #endif
             dist_array[tid] = 0;
         } else {
             // If other vertices rho = 0, dist = -1
             #ifdef SYNC 
             atomicExch(&sigma[tid] , 0.0f);
+            #else
+            sigma[tid] = 0.0f;
             #endif
             dist_array[tid] = -1;
         }
