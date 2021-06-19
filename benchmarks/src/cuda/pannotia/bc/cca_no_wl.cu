@@ -172,18 +172,20 @@ void compute1(int nodes,
                                 #ifdef SYNC
                                 if ((ret = atomicMin(&nstat[ostat], vstat)) != ostat) {
                                 #else
-                                if ((ret = ((nstat[ostat] < vstat) ? nstat[ostat] : vstat)) != ostat)
+                                if ((ret = ((nstat[ostat] < vstat) ? nstat[ostat] : vstat)) != ostat){
                                 #endif    
                                     ostat = ret;
                                     repeat = true;
                                 }
                             } else {
                                 #ifdef SYNC
-                                if ((ret = atomicMin(&nstat[vstat], ostat)) != vstat) {
+                                if ((ret = atomicMin(&nstat[vstat], ostat)) != vstat) 
                                 #else
                                 int ret = (nstat[vstat] < ostat) ? nstat[vstat] : ostat;
-                                if (ret != vstat){
-                                #endif    
+                                if (ret != vstat)
+                                #endif  
+                                {
+                                 
                                     vstat = ret;
                                     repeat = true;
                                 }
